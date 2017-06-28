@@ -3,7 +3,7 @@
  * FILE:	TDKPrettyPrint.swift
  * DESCRIPTION:	TwitterDevKit: Pretty Formatter for Tweet
  * DATE:	Wed, Jun 14 2017
- * UPDATED:	Tue, Jun 20 2017
+ * UPDATED:	Wed, Jun 28 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -67,84 +67,18 @@ public enum TDKTweetAttribute: String {
 // MARK: - Properties
 extension TDKTweet
 {
-  public var prettyPrint: NSAttributedString? {
-    guard let tweet = text else {
-      return nil
-    }
-    let tweetString = NSMutableAttributedString(string: tweet)
-    tweetString.addAttributes([
-      NSFontAttributeName : UIFont.systemFont(ofSize: 14.0)
-    ], range: NSRange(location: 0, length: tweetString.length))
+  public var prettyPrintedString: NSAttributedString? {
+    let pretty = self.prettyPrinted()
+    guard let tweet = pretty.text else { return nil }
 
-    if let hashtags = entities?.hashtags {
-      let attributes: [String:Any] = [
-        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 14.0),
-        NSForegroundColorAttributeName : UIColor.brown
-      ]
-      for hashtag in hashtags {
-        if let range = tweet.range(of: "#" + hashtag.text) {
-          tweetString.addAttributes(attributes, range: tweet.nsRange(from: range))
-        }
-        else
-        if let start = hashtag.indices.first,
-           let   end = hashtag.indices.last {
-          let  range = NSRange(location: start, length: end - start)
-          tweetString.addAttributes(attributes, range: range)
-        }
-      }
-    }
-
-    if let media = entities?.media {
-      let attributes: [String:Any] = [
-        NSForegroundColorAttributeName : UIColor.cyan,
-        NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
-      ]
-      for medium in media {
-        if let start = medium.indices.first,
-           let   end = medium.indices.last {
-          let  range = NSRange(location: start, length: end - start)
-          tweetString.addAttributes(attributes, range: range)
-        }
-      }
-    }
-
-    if let urls = entities?.urls {
-      let attributes: [String:Any] = [
-        NSForegroundColorAttributeName : UIColor.blue,
-        NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
-      ]
-      for url in urls {
-        if let start = url.indices.first,
-           let   end = url.indices.last {
-          let  range = NSRange(location: start, length: end - start)
-          tweetString.addAttributes(attributes, range: range)
-        }
-        else if let urlStr = url.url {
-          if let range = tweet.range(of: urlStr) {
-            tweetString.addAttributes(attributes, range: tweet.nsRange(from: range))
-          }
-        }
-      }
-    }
-
-    if let mentions = entities?.userMentions {
-      let attributes = [ NSForegroundColorAttributeName : UIColor.purple ]
-      for mention in mentions {
-        if let start = mention.indices.first,
-           let   end = mention.indices.last {
-          let  range = NSRange(location: start, length: end - start)
-          tweetString.addAttributes(attributes, range: range)
-        }
-      }
-    }
-
-#if     FULL_PRETTY_FORMAT
+#if     FULL_PRETTY_PRINTED
+    let tweetString = NSMutableAttributedString(attributedString: tweet)
     let retString = NSMutableAttributedString()
 
     if let name = user?.name {
       let temp = String(format: "%@\n", name)
       let attributes: [String:Any] = [
-        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 15.0),
+        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 14.0),
         NSForegroundColorAttributeName : UIColor.black
       ]
       retString.append(NSAttributedString(string: temp, attributes: attributes))
@@ -152,7 +86,7 @@ extension TDKTweet
     if let screenName = user?.screenName {
       let temp = String(format: "@%@\n", screenName)
       let attributes: [String:Any] = [
-        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 13.0),
+        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 14.0),
         NSForegroundColorAttributeName : UIColor.darkGray
       ]
       retString.append(NSAttributedString(string: temp, attributes: attributes))
@@ -166,36 +100,66 @@ extension TDKTweet
     }
     return retString
 #else
-    return tweetString
+    return tweet
 #endif
+  }
+
+  var displayedText: String? {
+    var retval: String? = self.text
+    if let  text = self.fullText,
+       var first = self.displayTextRange?.first,
+       var  last = self.displayTextRange?.last {
+      let range = text.startIndex..<text.endIndex
+      var chars : [String] = []
+      text.enumerateSubstrings(in: range, options: .byComposedCharacterSequences) {
+        (substring, _, _, _) -> () in
+        if let substring = substring {
+          chars.append(substring)
+        }
+      }
+      // XXX: 絵文字が含まれるとおかしい値が含まれる場合もあるので強制補正
+      if last > chars.count {
+        last = chars.count
+      }
+       first = 0 // XXX: entities の範囲と食い違いが起こったので 0 固定
+      retval = chars[first..<last].joined()
+    }
+    return retval
   }
 }
 
 // MARK: - Methods
 extension TDKTweet
 {
-  public func prettyText(with attributes: [TDKTweetAttribute:[String:Any]]? = nil) -> (text: NSAttributedString?, clickable: [String:[String:(NSRange,Any)]]?) {
-    guard let text = self.text else {
-      return (nil, nil)
-    }
+  public func prettyPrinted(with attributes: [TDKTweetAttribute:[String:Any]]? = nil) -> (text: NSAttributedString?, clickable: [String:[String:(NSRange,Any)]]?) {
+    guard let text = self.displayedText else { return (nil, nil) }
 
     let tweetString = NSMutableAttributedString(string: text)
-    let range: NSRange = NSRange(location: 0, length: tweetString.length)
+    let tweetLength = tweetString.length
+    let range: NSRange = NSRange(location: 0, length: tweetLength)
     if let attributes = attributes?[.tweet] {
       tweetString.addAttributes(attributes, range: range)
     }
     else {
+      var lang: String = Locale.preferredLanguages[0]
+      lang = lang.substring(to: lang.index(lang.startIndex, offsetBy: 2))
       tweetString.addAttributes([
-        NSFontAttributeName : UIFont.systemFont(ofSize: 14.0)
+        kCTLanguageAttributeName as String : lang, // 禁則処理を言語に合わせる
+        NSFontAttributeName : UIFont.systemFont(ofSize: 16.0)
       ], range: range)
     }
 
+    /*
+     * XXX: ATTENTION!!!
+     * entities の indices を利用すると絵文字が含まれている場合、
+     * 位置がずれるので実際の文字列から NSRange を計算して利用する。
+     */
     var clickable: [String:[String:(NSRange,Any)]] = [:]
-    let prettyColor = UIColor(red: 0.0039, green: 0.589844, blue: 0.988281, alpha: 1.0)
+    let prettyColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
 
     if let hashtags = self.entities?.hashtags {
       var hashtagAttrs: [String:Any] = [
-        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 14.0),
+        NSFontAttributeName : UIFont.boldSystemFont(ofSize: 16.0),
         NSForegroundColorAttributeName : prettyColor
       ]
       if let attributes = attributes?[.hashtag] {
@@ -204,17 +168,10 @@ extension TDKTweet
 
       var hashmap: [String:(NSRange,Any)] = [:]
       for hashtag in hashtags {
-        if let textRange = text.range(of: "#" + hashtag.text) {
-          let range: NSRange = text.nsRange(from: textRange)
-          tweetString.addAttributes(hashtagAttrs, range: range)
-          hashmap[hashtag.text] = (range, hashtag)
-        }
-        else
-        if let start = hashtag.indices.first,
-           let   end = hashtag.indices.last {
-          let  range = NSRange(location: start, length: end - start)
-          tweetString.addAttributes(hashtagAttrs, range: range)
-          hashmap[hashtag.text] = (range, hashtag)
+        if let range = text.range(of: "#" + hashtag.text) {
+          let nsRange = text.nsRange(from: range)
+          tweetString.addAttributes(hashtagAttrs, range: nsRange)
+          hashmap[hashtag.text] = (nsRange, hashtag)
         }
       }
       if hashmap.count > 0 {
@@ -222,34 +179,26 @@ extension TDKTweet
       }
     }
 
-    if let media = self.entities?.media {
-      var mediaAttrs: [String:Any] = [
-        NSForegroundColorAttributeName : prettyColor,
-        NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
+    if let mentions = self.entities?.userMentions {
+      var mentionAttrs: [String:Any] = [
+        NSForegroundColorAttributeName : prettyColor
       ]
-      if let attributes = attributes?[.media] {
-        mediaAttrs = attributes
+      if let attributes = attributes?[.mention] {
+        mentionAttrs = attributes
       }
 
-      var mediamap: [String:(NSRange,Any)] = [:]
-      for medium in media {
-        if let url = medium.url, let textRange = text.range(of: url) {
-          let range: NSRange = text.nsRange(from: textRange)
-          tweetString.addAttributes(mediaAttrs, range: range)
-          mediamap[url] = (range, medium)
-        }
-        else
-        if let start = medium.indices.first,
-           let   end = medium.indices.last {
-          let  range = NSRange(location: start, length: end - start)
-          tweetString.addAttributes(mediaAttrs, range: range)
-          if let url = medium.displayUrl {
-            mediamap[url] = (range, medium)
+      var mentionmap: [String:(NSRange,Any)] = [:]
+      for mention in mentions {
+        if let name = mention.screenName {
+          if let range = text.range(of: "@" + name) {
+            let nsRange = text.nsRange(from: range)
+            tweetString.addAttributes(mentionAttrs, range: nsRange)
+            mentionmap[name] = (nsRange, mention)
           }
         }
       }
-      if mediamap.count > 0 {
-        clickable["media"] = mediamap
+      if mentionmap.count > 0 {
+        clickable["mention"] = mentionmap
       }
     }
 
@@ -264,10 +213,12 @@ extension TDKTweet
 
       var urlmap: [String:(NSRange,Any)] = [:]
       for url in urls {
-        if let urlStr = url.url, let textRange = text.range(of: urlStr) {
-          let range: NSRange = text.nsRange(from: textRange)
-          tweetString.addAttributes(urlAttrs, range: range)
-          urlmap[urlStr] = (range, url)
+        if let urlStr = url.url {
+          if let range = text.range(of: urlStr) {
+            let nsRange = text.nsRange(from: range)
+            tweetString.addAttributes(urlAttrs, range: nsRange)
+            urlmap[urlStr] = (nsRange, url)
+          }
         }
       }
       if urlmap.count > 0 {
@@ -275,39 +226,99 @@ extension TDKTweet
       }
     }
 
-    if let mentions = self.entities?.userMentions {
-      var mentionAttrs: [String:Any] = [
-        NSForegroundColorAttributeName : prettyColor
+    var entities: TDKEntities? = nil
+    if let extendedEntities = self.extendedEntities {
+      entities = extendedEntities
+    }
+    else if let theEntities = self.entities {
+      entities = theEntities
+    }
+    if let media = entities?.media {
+      var mediaAttrs: [String:Any] = [
+        NSForegroundColorAttributeName : prettyColor,
+        NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
       ]
-      if let attributes = attributes?[.mention] {
-        mentionAttrs = attributes
+      if let attributes = attributes?[.media] {
+        mediaAttrs = attributes
       }
 
-      var mentionmap: [String:(NSRange,Any)] = [:]
-      for mention in mentions {
-        if let name = mention.screenName,
-           let textRange = text.range(of: "@" + name) {
-          let range: NSRange = text.nsRange(from: textRange)
-          tweetString.addAttributes(mentionAttrs, range: range)
-          mentionmap[name] = (range, mention)
+      var mediamap: [String:(NSRange,Any)] = [:]
+      for medium in media {
+        if let urlStr = medium.url, let displayUrl = medium.displayUrl {
+          if let range = text.range(of: urlStr) {
+            let nsRange = text.nsRange(from: range)
+            tweetString.addAttributes(mediaAttrs, range: nsRange)
+            mediamap[displayUrl] = (nsRange, medium)
+          }
         }
       }
-      if mentionmap.count > 0 {
-        clickable["mention"] = mentionmap
+      if mediamap.count > 0 {
+        clickable["media"] = mediamap
       }
     }
 
     return (tweetString, clickable)
   }
-
 }
 
+/*
+ * How does String substring work in Swift 3 - Stack Overflow
+ * https://stackoverflow.com/questions/39677330/how-does-string-substring-work-in-swift-3
+ */
+fileprivate extension String
+{
+  func index(from: Int) -> Index {
+    return self.index(startIndex, offsetBy: from)
+  }
+
+  // let str = "Hello, playground"
+
+  // print(str.substring(from: 7)) // playground
+  func substring(from: Int) -> String {
+    let fromIndex = index(from: from)
+    return substring(from: fromIndex)
+  }
+
+  // print(str.substring(to: 5)) // Hello
+  func substring(to: Int) -> String {
+    let toIndex = index(from: to)
+    return substring(to: toIndex)
+  }
+
+  // print(str.substring(with: 7..<11)) // play
+  func substring(with r: Range<Int>) -> String {
+    let startIndex = index(from: r.lowerBound)
+    let endIndex = index(from: r.upperBound)
+    return substring(with: startIndex..<endIndex)
+  }
+}
+
+/*
+ * ios - How to know if two emojis will be displayed as one emoji?
+ *     - Stack Overflow
+ * https://stackoverflow.com/questions/39104152/how-to-know-if-two-emojis-will-be-displayed-as-one-emoji
+ */
+fileprivate extension String
+{
+  var composedCharacterCount: Int {
+    var count = 0
+    enumerateSubstrings(in: startIndex..<endIndex, options: .byComposedCharacterSequences) {
+      (_, _, _, _) in count += 1
+    }
+    return count
+  }
+
+  var isSingleComposedCharacter: Bool {
+    return rangeOfComposedCharacterSequence(at: startIndex) == startIndex..<endIndex
+  }
+}
 
 /*
  * nsstring - NSRange to Range<String.Index> - Stack Overflow
  * https://stackoverflow.com/questions/25138339/nsrange-to-rangestring-index
  */
-extension String {
+fileprivate extension String
+{
   func nsRange(from range: Range<String.Index>) -> NSRange {
     let from = range.lowerBound.samePosition(in: utf16)
     let to = range.upperBound.samePosition(in: utf16)
@@ -316,7 +327,8 @@ extension String {
   }
 }
 
-extension String {
+fileprivate extension String
+{
   func range(from nsRange: NSRange) -> Range<String.Index>? {
     guard
       let from16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location, limitedBy: utf16.endIndex),

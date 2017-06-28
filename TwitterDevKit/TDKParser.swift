@@ -3,7 +3,7 @@
  * FILE:	TDKParser.swift
  * DESCRIPTION:	TwitterDevKit: Twitter API Response Parser
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Thu, Jun 22 2017
+ * UPDATED:	Mon, Jun 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -63,14 +63,22 @@ extension TDKTimeline {
       if json["entities"].dictionary != nil {
         tweet.entities = self.parseEntities(json["entities"])
       }
+
+      if let text = json["full_text"].string {
+        tweet.fullText = text
+      }
+      if json["extended_entities"].dictionary != nil {
+        tweet.extendedEntities = self.parseEntities(json["extended_entities"])
+      }
+      if let aval = json["display_text_range"].array {
+        tweet.displayTextRange = aval as? [Int]
+      }
+
       if let nval = json["favorite_count"].int {
         tweet.favoriteCount = nval
       }
       if let bval = json["favorited"].bool {
         tweet.favorited = bval
-      }
-      if let sval = json["filterLevel"].string {
-        tweet.filterLevel = sval
       }
       if let sval = json["in_reply_to_screen_name"].string {
         tweet.inReplyToScreenName = sval

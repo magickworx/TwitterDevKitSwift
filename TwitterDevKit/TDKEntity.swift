@@ -3,7 +3,7 @@
  * FILE:	TDKEntity.swift
  * DESCRIPTION:	TwitterDevKit: Defines Classes and Structures for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Sat, Jun 24 2017
+ * UPDATED:	Tue, Jun 27 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -310,13 +310,21 @@ public class TDKTweet {
   public internal(set) var createdAt: TDKDate? = nil
 
   public var text: String? = nil
+  public var entities: TDKEntities? = nil
+
+  /*
+   * Upcoming changes to Tweets ? Twitter Developers
+   * https://dev.twitter.com/overview/api/upcoming-changes-to-tweets
+   * tweet_mode=extended
+   */
+  public var fullText: String? = nil
+  public var extendedEntities: TDKEntities? = nil
+  public var displayTextRange: [Int]? = nil
 
   public var coordinates: TDKCoordinates? = nil
   public var currentUserRetweet: [String:Any]? = nil
-  public var entities: TDKEntities? = nil
   public var favoriteCount: Int = 0
   public var favorited: Bool = false
-  public var filterLevel: String = "none"
   public var inReplyToScreenName: String? = nil
   public var inReplyToStatusId: Int64 = 0
   public var inReplyToStatusIdStr: String? = nil
@@ -324,7 +332,7 @@ public class TDKTweet {
   public var inReplyToUserIdStr: String? = nil
   public var lang: String? = nil
   public var place: TDKPlaces? = nil
-  public var possiblySensitive: Bool = false
+  public var possiblySensitive: Bool = false // XXX: "true" なら画像非表示？
   public var quotedStatusId: Int64 = 0
   public var quotedStatusIdStr: String? = nil
   public var quotedStatus: TDKTweet? = nil
@@ -339,9 +347,47 @@ public class TDKTweet {
   public var withheldInCountries: [String]? = nil
   public var withheldScope: String? = nil
 
+  public var jsonData: Data? = nil // オリジナルの生データを保存
+
   public init(with id: Int64, idStr: String, createdAt: String) {
     self.id = id
     self.idStr = idStr
     self.createdAt = TDKDate(with: createdAt)
+  }
+}
+
+// MARK: - For Developers
+extension TDKTweet
+{
+  public var prettyPrintedSource: NSAttributedString? {
+    return source?.stringWithHTML()
+  }
+
+  public func prettyPrintedJSONData() -> String? {
+    if let data = jsonData, let dataString = String(data: data, encoding: .utf8) {
+      return dataString.replacingOccurrences(of: "\\/", with: "/").replacingOccurrences(of: "\\\"", with: "\"")
+    }
+    return nil
+  }
+}
+
+
+fileprivate extension String
+{
+  func stringWithHTML() -> NSAttributedString? {
+    var attributedString: NSAttributedString? = nil
+    if let data = self.data(using: .utf8, allowLossyConversion: true) {
+      let options: [String:Any] = [
+        NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
+        NSCharacterEncodingDocumentAttribute: String.Encoding.utf8
+      ]
+      do {
+        attributedString = try NSAttributedString(data: data, options: options, documentAttributes: nil)
+      }
+      catch {
+        // XXX: Nothing to do now...
+      }
+    }
+    return attributedString
   }
 }

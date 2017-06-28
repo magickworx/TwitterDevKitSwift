@@ -3,7 +3,7 @@
  * FILE:	TDKJSON.swift
  * DESCRIPTION:	TwitterDevKit: JSON Parser for Responses from Twitter API
  * DATE:	Sun, Jun 11 2017
- * UPDATED:	Sun, Jun 18 2017
+ * UPDATED:	Mon, Jun 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -65,7 +65,7 @@ public struct JSON: Equatable {
 
   internal init(source: Any?) {
     // UTC time like "Wed Aug 27 13:08:45 +0000 2008"
-    JSON.dateFormatter.dateFormat = "EEE MMM dd HH:mm:ss Z yyyy"
+    JSON.dateFormatter.dateFormat = "EEE MMM dd HH:mm:ss ZZZZ yyyy"
     JSON.dateFormatter.locale = Locale(identifier: "en_US_POSIX")
 
     if let source = source {
@@ -128,6 +128,34 @@ extension JSON {
   public var url: URL? {
     if let string = string?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
       return URL(string: string)
+    }
+    return nil
+  }
+
+  public var data: Data? {
+    let obj: Any
+    switch self.type(of: source as Any) {
+      case .typeString:
+        return self.string?.data(using: .utf8)
+      case .typeInt, .typeInt64, .typeDouble, .typeFloat:
+        return self.number?.stringValue.data(using: .utf8)
+      case .typeArray:
+        guard let array = self.array else { return nil }
+        obj = array
+      case .typeDictionary:
+        guard let dictionary = self.dictionary else { return nil }
+        obj = dictionary
+      case .typeUnknown:
+        return nil
+    }
+
+    guard JSONSerialization.isValidJSONObject(obj) else { return nil }
+    do {
+      let data = try JSONSerialization.data(withJSONObject: obj, options: .prettyPrinted)
+      return data
+    }
+    catch {
+      dump(obj)
     }
     return nil
   }

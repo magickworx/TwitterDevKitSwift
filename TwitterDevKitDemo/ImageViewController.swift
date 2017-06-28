@@ -3,7 +3,7 @@
  * FILE:	ImageViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Present UIImage
  * DATE:	Fri, Jun 23 2017
- * UPDATED:	Sat, Jun 24 2017
+ * UPDATED:	Wed, Jun 28 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -91,13 +91,13 @@ class ImageViewController: UIViewController
       imageView.image = image
     }
 
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
-    imageView.addGestureRecognizer(tapGesture)
-
     let closeItem = UIBarButtonItem(barButtonSystemItem: .stop,
                                     target: self,
                                     action: #selector(closeAction))
+    closeItem.tintColor = .lightGray
     self.navigationItem.leftBarButtonItem = closeItem
+
+    self.addGestures()
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -175,9 +175,48 @@ extension ImageViewController
     self.dismiss(animated: true, completion: nil)
   }
 
+  func addGestures() {
+    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+    imageView.addGestureRecognizer(tapGesture)
+
+    let holdGesture = UILongPressGestureRecognizer(target: self, action: #selector(holdHandler))
+    holdGesture.minimumPressDuration = 1.8 // seconds
+    imageView.addGestureRecognizer(holdGesture)
+  }
+
   func tapHandler(gesture: UITapGestureRecognizer) {
     if let isHidden = self.navigationController?.navigationBar.isHidden {
       self.navigationController?.setNavigationBarHidden(!isHidden, animated: true)
+    }
+  }
+
+  func holdHandler(gesture: UILongPressGestureRecognizer) {
+    guard gesture.state == .began else { return } // 押し始めのみ利用
+
+    if let image = self.image {
+      UIImageWriteToSavedPhotosAlbum(image, self, #selector(handleSavedImage(_:didFinishSavingWithError:contextInfo:)), nil) 
+    }
+  }
+
+  func handleSavedImage(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeMutableRawPointer) {
+    let title: String
+    let message: String
+    if let error = error {
+      title = "Error"
+      message = error.localizedDescription
+    }
+    else {
+      title = "Completed"
+      message = "Saved the image into Photo Album."
+    }
+    DispatchQueue.main.async() { [weak self] () -> Void in
+      if let weakSelf = self {
+        autoreleasepool {
+          let alertController: UIAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+          alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+          weakSelf.present(alertController, animated: true, completion: nil)
+        }
+      }
     }
   }
 }

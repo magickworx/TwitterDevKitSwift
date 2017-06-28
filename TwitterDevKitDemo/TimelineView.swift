@@ -3,7 +3,7 @@
  * FILE:	TimelineView.swift
  * DESCRIPTION:	TwitterDevKitDemo: Generic Timeline View Class
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Fri, Jun 23 2017
+ * UPDATED:	Wed, Jun 28 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -116,6 +116,11 @@ extension TimelineView
       self.tableData = tempData
       self.tableView.reloadData()
     }
+  }
+
+  public func clearTimelineData() {
+    self.tableData.removeAll()
+    self.tableView.reloadData()
   }
 }
 

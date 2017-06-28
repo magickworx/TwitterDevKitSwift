@@ -3,7 +3,7 @@
  * FILE:	UserViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show User Timeline
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Sat, Jun 24 2017
+ * UPDATED:	Wed, Jun 28 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -156,7 +156,7 @@ extension UserViewController: TimelineViewDelegate
   func clickableAction(_ action: TDKClickableActionType, in tweet: TDKTweet) {
     switch action {
       case .icon(let user):
-        if let twitter = self.twitter, let screenName = user.screenName {
+        if let twitter = self.twitter, let screenName = user.screenName, screenName != self.screenName {
           autoreleasepool {
             let viewController = UserViewController(with: twitter, screenName: screenName)
             self.navigationController?.pushViewController(viewController, animated: true)
@@ -211,16 +211,11 @@ extension UserViewController: TimelineViewDelegate
   }
 
   func timelineView(_ timelineView: TimelineView, didSelect tweet: TDKTweet) {
-    /*
-     *  ios - Is there any dump() like function returns a string?
-     *      - Stack Overflow
-     * https://stackoverflow.com/questions/37581828/is-there-any-dump-like-function-returns-a-string
-     */
     autoreleasepool {
-      var text = String()
-      dump(tweet, to: &text)
-      let viewController = DumpViewController(with: text)
-      self.navigationController?.pushViewController(viewController, animated: true)
+      if let text = tweet.prettyPrintedJSONData() {
+        let viewController = DumpViewController(with: text)
+        self.navigationController?.pushViewController(viewController, animated: true)
+      }
     }
   }
 }

@@ -3,7 +3,7 @@
  * FILE:	TDKTwitter.swift
  * DESCRIPTION:	TwitterDevKit: REST API Wrapper for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Thu, Jun 22 2017
+ * UPDATED:	Sun, Jun 25 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -105,6 +105,113 @@ extension TDKTwitter
             metadata = json["search_metadata"]
           }
           completion(timeline, metadata, error)
+        })
+      }
+    }
+  }
+}
+
+// MARK: - Favorites Methods
+extension TDKTwitter
+{
+  public func getFavoritesList(with parameters: TDKFavoritesParameters? = nil, completion: @escaping TDKTimelineCompletionHandler) {
+    if let requestURL = URL(string: "https://api.twitter.com/1.1/favorites/list.json") {
+      if let postRequest = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .GET, url: requestURL, parameters: parameters?.toJSON()) {
+        postRequest.account = self.account
+        postRequest.perform(handler: { (responseData, urlResponse, error) in
+          var timeline: TDKTimeline? = nil
+          if let jsonData = responseData {
+            let json = JSON(jsonData)
+            timeline = TDKTimeline(with: json)
+          }
+          completion(timeline, error)
+        })
+      }
+    }
+  }
+
+  public func createFavorites(with statusId: String, completion: @escaping TDKTimelineCompletionHandler) {
+    if let requestURL = URL(string: "https://api.twitter.com/1.1/favorites/create.json") {
+      let parameters: [String:Any] = [
+        "id" : statusId,
+        "include_entities" : String(true)
+      ]
+      if let postRequest = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
+        postRequest.account = self.account
+        postRequest.perform(handler: { (responseData, urlResponse, error) in
+          var timeline: TDKTimeline? = nil
+          if let jsonData = responseData {
+            let json = JSON(jsonData)
+            timeline = TDKTimeline(with: json)
+          }
+          completion(timeline, error)
+        })
+      }
+    }
+  }
+
+  public func deleteFavorites(with statusId: String, completion: @escaping TDKTimelineCompletionHandler) {
+    if let requestURL = URL(string: "https://api.twitter.com/1.1/favorites/destroy.json") {
+      let parameters: [String:Any] = [
+        "id" : statusId,
+        "include_entities" : String(true)
+      ]
+      if let postRequest = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
+        postRequest.account = self.account
+        postRequest.perform(handler: { (responseData, urlResponse, error) in
+          var timeline: TDKTimeline? = nil
+          if let jsonData = responseData {
+            let json = JSON(jsonData)
+            timeline = TDKTimeline(with: json)
+          }
+          completion(timeline, error)
+        })
+      }
+    }
+  }
+}
+
+// MARK: - Statuses Methods
+extension TDKTwitter
+{
+  public func removeTweet(with statusId: String, completion: @escaping TDKTimelineCompletionHandler) {
+    let urlString = "https://api.twitter.com/1.1/statuses/destroy/" + statusId + ".json"
+    if let requestURL = URL(string: urlString) {
+      let parameters: [String:Any] = [
+        "id" : statusId,
+        "trim_user" : String(false)
+      ]
+      if let postRequest = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
+        postRequest.account = self.account
+        postRequest.perform(handler: { (responseData, urlResponse, error) in
+          var timeline: TDKTimeline? = nil
+          if let jsonData = responseData {
+            let json = JSON(jsonData)
+            timeline = TDKTimeline(with: json)
+          }
+          completion(timeline, error)
+        })
+      }
+    }
+  }
+
+  public func retweet(with statusId: String, count: Int = 100, completion: @escaping TDKTimelineCompletionHandler) {
+    let urlString = "https://api.twitter.com/1.1/statuses/retweets/" + statusId + ".json"
+    if let requestURL = URL(string: urlString) {
+      let parameters: [String:Any] = [
+        "id" : statusId,
+        "count": String(count < 0 || count > 100 ? 100 : count),
+        "trim_user" : String(false)
+      ]
+      if let postRequest = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
+        postRequest.account = self.account
+        postRequest.perform(handler: { (responseData, urlResponse, error) in
+          var timeline: TDKTimeline? = nil
+          if let jsonData = responseData {
+            let json = JSON(jsonData)
+            timeline = TDKTimeline(with: json)
+          }
+          completion(timeline, error)
         })
       }
     }

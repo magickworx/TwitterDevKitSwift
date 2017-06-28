@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Sat, Jun 24 2017
+ * UPDATED:	Mon, Jun 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -171,10 +171,18 @@ public class TDKTweetTableCell: UITableViewCell
     screenLabel.frame = CGRect(x: x, y: y, width: w, height: h)
     y += (h + s)
 
-    if let text = tweetLabel.text {
+    if let text = tweetLabel.attributedText {
+      let constraintSize = CGSize(width: w, height: maxHeight)
+      let size = text.boundingRect(with: constraintSize, options: .usesLineFragmentOrigin, context: nil).size
+      h = size.height
+    }
+    else if let text = tweetLabel.text {
+      var lang: String = Locale.preferredLanguages[0]
+      lang = lang.substring(to: lang.index(lang.startIndex, offsetBy: 2))
       let paragraphStyle = NSMutableParagraphStyle()
       paragraphStyle.lineBreakMode = tweetLabel.lineBreakMode
       let attributes: [String:Any] = [
+        kCTLanguageAttributeName as String : lang, // 禁則処理を言語に合わせる
         NSFontAttributeName : tweetLabel.font,
         NSParagraphStyleAttributeName : paragraphStyle
       ]
@@ -304,9 +312,8 @@ extension TDKTweetTableCell
 {
   func composeTweet() {
     guard let tweet = self.tweet else { return }
-    var status: TDKTweet = tweet
     if let quotedStatus = tweet.quotedStatus {
-      let pretty = quotedStatus.prettyText()
+      let pretty = quotedStatus.prettyPrinted()
       if let clickable = pretty.clickable {
         if clickable.count > 0 {
           clickableQuoteMap = clickable
@@ -338,7 +345,9 @@ extension TDKTweetTableCell
         }
       }
     }
-    else if let retweetedStatus = tweet.retweetedStatus {
+
+    var status: TDKTweet = tweet
+    if let retweetedStatus = tweet.retweetedStatus {
       status = retweetedStatus
 
       if let name = tweet.user?.name {
@@ -349,7 +358,7 @@ extension TDKTweetTableCell
       }
     }
 
-    let pretty = status.prettyText()
+    let pretty = status.prettyPrinted()
     if let clickable = pretty.clickable {
       if clickable.count > 0 {
         clickableTweetMap = clickable
@@ -395,8 +404,8 @@ extension TDKTweetTableCell
     if let place = status.place {
       dump(place)
     }
-    if status.filterLevel.lowercased() != "none" {
-      dump(status.filterLevel)
+    if status.possiblySensitive {
+      print("sensitive")
     }
   }
 }
@@ -482,7 +491,10 @@ extension TDKTweetTableCell
   func didTapAttributedText(in label: UILabel, at location: CGPoint) -> Int {
     if let attributedString = label.attributedText {
       let attributedText = NSMutableAttributedString(attributedString: attributedString)
+      var lang: String = Locale.preferredLanguages[0]
+      lang = lang.substring(to: lang.index(lang.startIndex, offsetBy: 2))
       attributedText.addAttributes([
+        kCTLanguageAttributeName as String : lang, // 禁則処理を言語に合わせる
         NSFontAttributeName: label.font
       ], range: NSMakeRange(0, attributedString.string.glyphCount))
       // Create instances of NSLayoutManager, NSTextContainer and NSTextStorage

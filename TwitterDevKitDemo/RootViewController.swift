@@ -3,7 +3,7 @@
  * FILE:	RootViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Twitter View Controller
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Sat, Jun 24 2017
+ * UPDATED:	Mon, Jun 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -47,8 +47,7 @@ import TwitterDevKit
 
 class RootViewController: BaseViewController
 {
-  var progressBar: UIProgressView = UIProgressView()
-  var timelineView: TimelineView = TimelineView()
+  let imageView: UIImageView = UIImageView()
 
   var twitterAccount: ACAccount? = nil
   var twitter: TDKTwitter? = nil
@@ -67,38 +66,22 @@ class RootViewController: BaseViewController
   override func loadView() {
     super.loadView()
 
-    let  width: CGFloat = self.view.bounds.size.width
-    let height: CGFloat = self.view.bounds.size.height
-    let x: CGFloat = 0.0
-    var y: CGFloat = 0.0
-    let w: CGFloat = width
-    var h: CGFloat = 2.0
+    self.view.backgroundColor = self.app.themeColor
 
-    progressBar.frame = CGRect(x: x, y: y, width: w, height: h)
-    progressBar.progressTintColor = .orange
-    self.view.addSubview(progressBar)
-
-    y = h
-    h = height - h
-    timelineView.frame = CGRect(x: x, y: y, width: w, height: h)
-    timelineView.delegate = self
-    self.view.addSubview(timelineView)
+    if let image = self.image(with: "★") {
+      let x: CGFloat = 0.0
+      let y: CGFloat = 0.0
+      let w: CGFloat = image.size.width
+      let h: CGFloat = image.size.height
+      imageView.frame = CGRect(x: x, y: y, width: w, height: h)
+      imageView.center = self.view.center
+      imageView.image = image
+    }
+    self.view.addSubview(imageView)
   }
 
   override func viewDidLoad() {
     super.viewDidLoad()
-
-    getAccount(completion: { (accounts: [ACAccount]) -> Void in
-#if     true
-      self.chooseAccount(from: accounts)
-#else
-      self.twitterAccount = accounts.last
-      if let account = self.twitterAccount {
-        self.twitter = TDKTwitter(with: account)
-      }
-      self.getHomeTimeline()
-#endif
-    })
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -106,11 +89,29 @@ class RootViewController: BaseViewController
 
     self.navigationController?.navigationBar.isHidden = false
   }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+
+    DispatchQueue.once(token: "com.magickworx.TwitterDevKitDemo") {
+      launchAnimation()
+    }
+  }
 }
 
 extension RootViewController
 {
-  func getAccount(completion: @escaping (_ accounts: [ACAccount]) -> Void) {
+  func signIn() {
+    acquireAccount(completion: { (accounts: [ACAccount]) -> Void in
+      DispatchQueue.main.async() { [weak self] () -> Void in
+        if let weakSelf = self {
+          weakSelf.chooseAccount(from: accounts)
+        }
+      }
+    })
+  }
+
+  func acquireAccount(completion: @escaping (_ accounts: [ACAccount]) -> Void) {
     let store = ACAccountStore()
     let accountType = store.accountType(withAccountTypeIdentifier: ACAccountTypeIdentifierTwitter)
 
@@ -143,10 +144,14 @@ extension RootViewController
     for account in accounts {
       alert.addAction(UIAlertAction(title: account.username, style: .default, handler: { [weak self] (action) -> Void in
         if let weakSelf = self {
-          weakSelf.title = account.username
+          if let currentAccount = weakSelf.twitterAccount {
+            guard currentAccount.username != account.username else {
+              return
+            }
+          }
           weakSelf.twitterAccount = account
           weakSelf.twitter = TDKTwitter(with: account)
-          weakSelf.getHomeTimeline()
+          weakSelf.homeTimeline()
         }
       }))
     }
@@ -172,125 +177,151 @@ extension RootViewController
 
 extension RootViewController
 {
-  func handleTimeline(_ timeline: TDKTimeline) {
-    progressBar.progress = 0.0
-    let  total = timeline.total
-    var  count = 0
-    var tweets = [AnyObject]()
-    for tweet in timeline {
-      tweets.append(tweet)
-      count += 1
-      DispatchQueue.main.async() {
-        let progress: Float = Float(count) / Float(total)
-        self.progressBar.setProgress(progress, animated: true)
-        if progress >= 1.0 {
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.progressBar.setProgress(0.0, animated: false)
-          }
+  func homeTimeline() {
+    if let twitter = self.twitter, let account = self.twitterAccount {
+      let viewController = HomeViewController(with: twitter, account: account)
+      viewController.delegate = self
+      let navigationController = UINavigationController(rootViewController: viewController)
+      self.change(to: navigationController)
+    }
+  }
+
+  func change(to viewController: UIViewController) {
+    let completionBlock = { [weak self] (finished: Bool) -> Void in
+      if let weakSelf = self {
+        if let fromViewController = weakSelf.childViewControllers.first {
+          viewController.didMove(toParentViewController: weakSelf)
+          fromViewController.removeFromParentViewController()
         }
       }
     }
-    timelineView.setTimelineData(tweets)
-    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-  }
 
-  func getHomeTimeline(with sinceId: Int64 = 0) {
-    if let twitter = self.twitter {
-      let count = 200 // 読み込むツィートの数
-      let parameters = TDKHomeTimelineParameters(with: count)
-      if sinceId > 0 {
-        parameters.sinceId = sinceId
-      }
-      UIApplication.shared.isNetworkActivityIndicatorVisible = true
-      twitter.getHomeTimeline(with: parameters, completion: {
-        (timeline: TDKTimeline?, error: Error?) in
-        if error == nil, let timeline = timeline {
-          self.handleTimeline(timeline)
-        }
-        else {
-          UIApplication.shared.isNetworkActivityIndicatorVisible = false
-          dump(error)
-        }
-      })
+    if let fromViewController = self.childViewControllers.first {
+      self.addChildViewController(viewController)
+      self.transition(from: fromViewController,
+                        to: viewController,
+                  duration: 0.0,
+                   options: [],
+                animations: nil,
+                completion: completionBlock)
+    }
+    else {
+      self.addChildViewController(viewController)
+      self.view.addSubview(viewController.view)
+      viewController.didMove(toParentViewController: self)
     }
   }
 }
 
-
-extension RootViewController: TimelineViewDelegate
+extension RootViewController: HomeViewControllerDelegate
 {
-  func timelineView(_ timelineView: TimelineView, willRefreshSince latestTweet: TDKTweet) -> Void {
-    self.getHomeTimeline(with: latestTweet.id)
+  func homeViewControllerWillChangeAccount(_ viewController: HomeViewController) -> Void {
+    signIn()
   }
+}
 
-  func clickableAction(_ action: TDKClickableActionType, in tweet: TDKTweet) {
-    switch action {
-      case .icon(let user):
-        if let twitter = self.twitter, let screenName = user.screenName {
-          autoreleasepool {
-            let viewController = UserViewController(with: twitter, screenName: screenName)
-            self.navigationController?.pushViewController(viewController, animated: true)
-          }
-        }
-        else {
-          dump(user)
-        }
-      case .hashtag(let hashtag, let text):
-        if let twitter = self.twitter {
-          autoreleasepool {
-            let viewController = SearchViewController(with: twitter, query: "#" + text)
-            self.navigationController?.pushViewController(viewController, animated: true)
-          }
-        }
-        else {
-          dump(hashtag)
-        }
-      case .media(let media, let text):
-        if let expandedUrl = media.expandedUrl {
-          self.openSafari(string: expandedUrl)
-        }
-        if let mediaUrlHttps = media.mediaUrlHttps {
-          self.openSafari(string: mediaUrlHttps)
-        }
-        if let mediaUrl = media.mediaUrl {
-          self.openSafari(string: mediaUrl)
-        }
-        else {
-          self.openSafari(string: text)
-        }
-      case .url(let url, let text):
-        if let expandedUrl = url.expandedUrl {
-          self.openSafari(string: expandedUrl)
-        }
-        else {
-          self.openSafari(string: text)
-        }
-      case .mention(let mention, let screenName):
-        if let twitter = self.twitter {
-          autoreleasepool {
-            let viewController = UserViewController(with: twitter, screenName: screenName)
-            self.navigationController?.pushViewController(viewController, animated: true)
-          }
-        }
-        else {
-          dump(mention)
-        }
-      case .image(let image):
-        self.presentImage(image)
+extension RootViewController
+{
+  func launchAnimation() {
+    let zoomInAnimations = { [weak self] () -> Void in
+      if let weakSelf = self {
+        weakSelf.imageView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+      }
     }
+    let zoomOutAnimations = { [weak self] () -> Void in
+      if let weakSelf = self {
+        weakSelf.imageView.transform = CGAffineTransform(scaleX: 10.0, y: 10.0)
+        weakSelf.imageView.alpha = 0.0
+      }
+    }
+    let completionClosure = { [weak self] (finished: Bool) -> Void in
+      UIView.animate(withDuration: 1.0,
+                     delay: 0.0,
+                     options: .curveEaseOut,
+                     animations: zoomOutAnimations,
+                     completion: { [weak self] (finished: Bool) -> Void in
+                       if let weakSelf = self {
+                          weakSelf.imageView.removeFromSuperview()
+                          weakSelf.signIn()
+                        }
+                     })
+    }
+    UIView.animate(withDuration: 0.5,
+                   delay: 1.0,
+                   options: .curveEaseOut,
+                   animations: zoomInAnimations,
+                   completion: completionClosure)
   }
+}
 
-  func timelineView(_ timelineView: TimelineView, didSelect tweet: TDKTweet) {
-    /*
-     *  ios - Is there any dump() like function returns a string?
-     *      - Stack Overflow
-     * https://stackoverflow.com/questions/37581828/is-there-any-dump-like-function-returns-a-string
-     */
-    autoreleasepool {
-      var text = String()
-      dump(tweet, to: &text)
-      let viewController = DumpViewController(with: text)
-      self.navigationController?.pushViewController(viewController, animated: true)
+extension RootViewController
+{
+  /*
+   * Reference:
+   * http://ios.ch3cooh.jp/entry/20140730/1406694860
+   */
+  func image(with text: String) -> UIImage? {
+    let   size: CGSize  = CGSize(width: 64.0, height: 64.0)
+    let opaque: Bool    = false
+    let  scale: CGFloat = 0.0
+
+    UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
+
+    let shadow = NSShadow()
+    shadow.shadowOffset = CGSize(width: 0.0, height: -0.5)
+    shadow.shadowColor = UIColor.darkGray
+    shadow.shadowBlurRadius = 0.0
+
+    let font = UIFont.boldSystemFont(ofSize: 32.0)
+
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .center
+    paragraphStyle.lineBreakMode = .byClipping
+
+    let attributes: [String:Any] = [
+      NSFontAttributeName: font,
+      NSParagraphStyleAttributeName: paragraphStyle,
+      NSShadowAttributeName: shadow,
+      NSForegroundColorAttributeName: UIColor.white
+    ]
+
+    let rect = CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height)
+    text.draw(in: rect, withAttributes:attributes)
+
+    var image: UIImage? = nil
+    if let textImage = UIGraphicsGetImageFromCurrentImageContext() {
+      image = textImage
     }
+
+    UIGraphicsEndImageContext()
+
+    return image
+  }
+}
+
+/*
+ * swift3 - Dispatch once in Swift 3 - Stack Overflow
+ * https://stackoverflow.com/questions/37886994/dispatch-once-in-swift-3
+ */
+public extension DispatchQueue
+{
+  private static var _onceTracker = [String]()
+
+  /**
+    Executes a block of code, associated with a unique token, only once.  The code is thread safe and will
+    only execute the code once even in the presence of multithreaded calls.
+
+     - parameter token: A unique reverse DNS style name such as com.vectorform.<name> or a GUID
+     - parameter block: Block to execute once
+  */
+  public class func once(token: String, block: (Void) -> Void) {
+    objc_sync_enter(self)
+    defer { objc_sync_exit(self) }
+
+    if _onceTracker.contains(token) {
+      return
+    }
+    _onceTracker.append(token)
+    block()
   }
 }

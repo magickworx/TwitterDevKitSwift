@@ -3,7 +3,7 @@
  * FILE:	AppDelegate.swift
  * DESCRIPTION:	TwitterDevKitDemo: Application Main Controller
  * DATE:	Fri, Jun  2 2017
- * UPDATED:	Tue, Jun 20 2017
+ * UPDATED:	Sun, Jun 25 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -44,9 +44,9 @@ import Foundation
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate
+class AppDelegate: UIResponder
 {
-  public private(set) var themeColor: UIColor? = nil
+  public fileprivate(set) var themeColor: UIColor? = nil
 
   var window: UIWindow?
 
@@ -54,18 +54,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     super.init()
     self.configureAppearance()
   }
+}
 
+extension AppDelegate: UIApplicationDelegate
+{
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
 
     // Create full-screen window
     self.window = UIWindow(frame: UIScreen.main.bounds)
-    self.window!.backgroundColor = .white
+    self.window!.backgroundColor = self.themeColor
 
     // Make root view controller
-    let viewController = RootViewController()
-    let navigationController = UINavigationController(rootViewController: viewController)
-    self.window!.rootViewController = navigationController
+    self.window!.rootViewController = RootViewController()
 
     // Show window
     self.window!.makeKeyAndVisible()
@@ -117,9 +118,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
      * Save data if appropriate. See also applicationDidEnterBackground:.
      */
   }
+}
 
+extension AppDelegate
+{
   func configureAppearance() {
-    let barColor: UIColor = UIColor(red: 0.0039, green: 0.589844, blue: 0.988281, alpha: 1.0)
+    // #1da1f2
+    let barColor: UIColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
 
     UINavigationBar.appearance().barTintColor = barColor
     UITabBar.appearance().barTintColor = barColor

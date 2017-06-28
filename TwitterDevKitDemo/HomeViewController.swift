@@ -1,9 +1,9 @@
 /*****************************************************************************
  *
- * FILE:	SearchViewController.swift
- * DESCRIPTION:	TwitterDevKitDemo: View Controller to Search Tweet
- * DATE:	Wed, Jun 21 2017
- * UPDATED:	Wed, Jun 28 2017
+ * FILE:	HomeViewController.swift
+ * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show Home Timeline
+ * DATE:	Sat, Jun 10 2017
+ * UPDATED:	Mon, Jun 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,22 +42,30 @@
 
 import Foundation
 import UIKit
+import Accounts
 import TwitterDevKit
 
-class SearchViewController: BaseViewController
+protocol HomeViewControllerDelegate: class
 {
-  var searchBar: UISearchBar = UISearchBar()
-  var progressBar: UIProgressView = UIProgressView()
-  var timelineView: TimelineView = TimelineView()
+  func homeViewControllerWillChangeAccount(_ viewController: HomeViewController) -> Void
+}
 
+class HomeViewController: BaseViewController
+{
+  public weak var delegate: HomeViewControllerDelegate? = nil
+
+  let titleButton: UIButton = UIButton(type: .custom)
+  let progressBar: UIProgressView = UIProgressView()
+  let timelineView: TimelineView = TimelineView()
+
+  var account: ACAccount? = nil
   var twitter: TDKTwitter? = nil
-  var query: String? = nil
 
-  public convenience init(with twitter: TDKTwitter, query: String) {
+  public convenience init(with twitter: TDKTwitter, account: ACAccount) {
     self.init()
 
     self.twitter = twitter
-    self.query = query
+    self.account = account
   }
 
   override func didReceiveMemoryWarning() {
@@ -89,19 +97,19 @@ class SearchViewController: BaseViewController
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    if let text = self.query {
-      searchBar.text = text
+    if self.twitter != nil {
+      self.getHomeTimeline()
     }
-    searchBar.placeholder = "Enter search word"
-    searchBar.delegate = self
-    searchBar.showsBookmarkButton = true
-    self.navigationItem.titleView = searchBar
 
-    self.navigationItem.rightBarButtonItem = nil
+    self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: nil, action: nil)
 
-    if let query = self.query {
-      self.searchTweet(with: query)
-    }
+    self.navigationItem.titleView = titleButton
+    titleButton.setTitle(account?.username, for: .normal)
+    titleButton.setTitleColor(.white, for: .normal)
+    titleButton.setTitleColor(.lightGray, for: .highlighted)
+    titleButton.addTarget(self, action: #selector(tapTitleButton), for: .touchUpInside)
+    titleButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20.0)
+    titleButton.sizeToFit()
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -111,7 +119,16 @@ class SearchViewController: BaseViewController
   }
 }
 
-extension SearchViewController
+extension HomeViewController
+{
+  func tapTitleButton(_ sender: UIButton) {
+    if let delegate = self.delegate {
+      delegate.homeViewControllerWillChangeAccount(self)
+    }
+  }
+}
+
+extension HomeViewController
 {
   func handleTimeline(_ timeline: TDKTimeline) {
     progressBar.progress = 0.0
@@ -135,16 +152,16 @@ extension SearchViewController
     UIApplication.shared.isNetworkActivityIndicatorVisible = false
   }
 
-  func searchTweet(with query: String, sinceId: Int64 = 0) {
+  func getHomeTimeline(with sinceId: Int64 = 0) {
     if let twitter = self.twitter {
-      let count = 20 // 読み込むツィートの数
-      let parameters = TDKSearchTweetParameters(with: query, count: count)
+      let count = 200 // 読み込むツィートの数
+      let parameters = TDKHomeTimelineParameters(with: count)
       if sinceId > 0 {
         parameters.sinceId = sinceId
       }
       UIApplication.shared.isNetworkActivityIndicatorVisible = true
-      twitter.searchTweet(with: parameters, completion: {
-        (timeline: TDKTimeline?, metadata: JSON?, error: Error?) in
+      twitter.getHomeTimeline(with: parameters, completion: {
+        (timeline: TDKTimeline?, error: Error?) in
         if error == nil, let timeline = timeline {
           self.handleTimeline(timeline)
         }
@@ -158,12 +175,10 @@ extension SearchViewController
 }
 
 
-extension SearchViewController: TimelineViewDelegate
+extension HomeViewController: TimelineViewDelegate
 {
   func timelineView(_ timelineView: TimelineView, willRefreshSince latestTweet: TDKTweet) -> Void {
-    if let query = self.query {
-      self.searchTweet(with: query, sinceId: latestTweet.id)
-    }
+    self.getHomeTimeline(with: latestTweet.id)
   }
 
   func clickableAction(_ action: TDKClickableActionType, in tweet: TDKTweet) {
@@ -179,11 +194,15 @@ extension SearchViewController: TimelineViewDelegate
           dump(user)
         }
       case .hashtag(let hashtag, let text):
-        let keyword = "#" + text
-        searchBar.text = keyword
-        self.timelineView.clearTimelineData()
-        self.searchTweet(with: keyword)
-//        dump(hashtag)
+        if let twitter = self.twitter {
+          autoreleasepool {
+            let viewController = SearchViewController(with: twitter, query: "#" + text)
+            self.navigationController?.pushViewController(viewController, animated: true)
+          }
+        }
+        else {
+          dump(hashtag)
+        }
       case .media(let media, let text):
         if let expandedUrl = media.expandedUrl {
           self.openSafari(string: expandedUrl)
@@ -220,45 +239,25 @@ extension SearchViewController: TimelineViewDelegate
   }
 
   func timelineView(_ timelineView: TimelineView, didSelect tweet: TDKTweet) {
+#if     false
+    /*
+     *  ios - Is there any dump() like function returns a string?
+     *      - Stack Overflow
+     * https://stackoverflow.com/questions/37581828/is-there-any-dump-like-function-returns-a-string
+     */
+    autoreleasepool {
+      var text = String()
+      dump(tweet, to: &text)
+      let viewController = DumpViewController(with: text)
+      self.navigationController?.pushViewController(viewController, animated: true)
+    }
+#else
     autoreleasepool {
       if let text = tweet.prettyPrintedJSONData() {
         let viewController = DumpViewController(with: text)
         self.navigationController?.pushViewController(viewController, animated: true)
       }
     }
-  }
-}
-
-extension SearchViewController: UISearchBarDelegate
-{
-  func inactiveSearchBar() {
-    searchBar.resignFirstResponder()
-    searchBar.showsCancelButton = false
-  }
-
-  func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-    searchBar.showsCancelButton = true
-    return true
-  }
-
-  func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
-    searchBar.showsCancelButton = false
-    return true
-  }
-
-  func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-    self.inactiveSearchBar()
-    if let text = searchBar.text {
-      self.searchTweet(with: "#" + text)
-    }
-  }
-
-  func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
-    self.inactiveSearchBar()
-  }
-
-  func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-    self.inactiveSearchBar()
-    searchBar.text = ""
+#endif
   }
 }

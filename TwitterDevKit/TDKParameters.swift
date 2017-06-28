@@ -3,7 +3,7 @@
  * FILE:	TDKParameters.swift
  * DESCRIPTION:	TwitterDevKit: REST API Parameters for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Fri, Jun 23 2017
+ * UPDATED:	Mon, Jun 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -52,9 +52,10 @@ public class TDKTimelineCommonParameters {
   public var maxId: Int64 = 0
   public var trimUser: Bool = false
   public var excludeReplies: Bool = false
+  public var tweetMode: String = "extended"
 
   public init(with count: Int = kDefaultCount) {
-    self.count = (count < -1 ? kDefaultCount : (count > 200 ? 200 : count))
+    self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
   }
 
   public func toJSON() -> [String:Any] {
@@ -70,6 +71,7 @@ public class TDKTimelineCommonParameters {
     }
     json["trim_user"] = String(trimUser)
     json["exclude_replies"] = String(excludeReplies)
+    json["tweet_mode"] = tweetMode
     return json
   }
 }
@@ -137,7 +139,7 @@ public class TDKSearchTweetParameters {
   public internal(set) var query: String
 
   public init(with q: String, count: Int = kDefaultCount) {
-    self.count = (count < -1 ? kDefaultCount : (count > 200 ? 200 : count))
+    self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
     let filteredQuery = q + " -filter:retweets"
     if let encodedQuery = filteredQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
       self.query = encodedQuery
@@ -165,6 +167,45 @@ public class TDKSearchTweetParameters {
     json["result_type"] = resultType
     if let until = until {
       json["until"] = until
+    }
+    if sinceId > 0 {
+      json["since_id"] = String(sinceId)
+    }
+    if maxId > 0 {
+      json["max_id"] = String(maxId)
+    }
+    json["include_entities"] = String(includeEntities)
+    return json
+  }
+}
+
+// MARK: - Parameters to get favorites list
+/*
+ * https://dev.twitter.com/rest/reference/get/favorites/list
+ */
+public class TDKFavoritesParameters {
+  public internal(set) var count: Int = kDefaultCount
+
+  public var userId: Int64 = 0
+  public var screenName: String? = nil
+  public var sinceId: Int64 = 0
+  public var maxId: Int64 = 0
+  public var includeEntities: Bool = true
+
+  public init(with count: Int = kDefaultCount) {
+    self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
+  }
+
+  public func toJSON() -> [String:Any] {
+    var json: [String:Any] = [:]
+    if userId > 0 {
+      json["user_id"] = String(userId)
+    }
+    if let screenName = screenName {
+      json["screen_name"] = screenName
+    }
+    if count > 0 {
+      json["count"] = String(count)
     }
     if sinceId > 0 {
       json["since_id"] = String(sinceId)
