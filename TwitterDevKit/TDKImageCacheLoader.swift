@@ -3,7 +3,7 @@
  * FILE:	TDKImageCacheLoader.swift
  * DESCRIPTION:	TwitterDevKit: Asynchoronous Image Downloader with Cache
  * DATE:	Sun, Jun 18 2017
- * UPDATED:	Sun, Jun 18 2017
+ * UPDATED:	Thu, Jun 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -43,11 +43,11 @@
 import Foundation
 import UIKit
 
-final class TDKImageCacheLoader
-{
-  static let shared: TDKImageCacheLoader = TDKImageCacheLoader()
+public typealias TDKImageCacheLoaderCompletionHandler = (UIImage?, Error?)->Void
 
-  public typealias TDKImageCacheLoaderCompletionHandler = ((UIImage)->Void)
+public final class TDKImageCacheLoader
+{
+  public static let shared: TDKImageCacheLoader = TDKImageCacheLoader()
 
   let cache = NSCache<NSString, UIImage>()
   let session = URLSession.shared
@@ -58,7 +58,7 @@ final class TDKImageCacheLoader
   public func fetchImage(with urlString: String, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
     if let image = cache.object(forKey: urlString as NSString) {
       DispatchQueue.main.async {
-        completion(image)
+        completion(image, nil)
       }
     }
     else {
@@ -66,14 +66,40 @@ final class TDKImageCacheLoader
         session.dataTask(with: url, completionHandler: {
           (data, response, error) in
           guard error == nil, let image = UIImage(data: data!) else {
+            DispatchQueue.main.async {
+              completion(nil, error)
+            }
             return
           }
           self.cache.setObject(image, forKey: urlString as NSString)
           DispatchQueue.main.async {
-            completion(image)
+            completion(image, nil)
           }
         }).resume()
       }
+    }
+  }
+
+  public func fetchPhoto(with urlString: String, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
+    if let url = URL(string: urlString) {
+      let req = URLRequest(url: url,
+                           cachePolicy: .returnCacheDataElseLoad,
+                           timeoutInterval: cachedTime)
+      let config = URLSessionConfiguration.default
+      let session = URLSession(configuration: config)
+      session.dataTask(with: req, completionHandler: {
+        (data, response, error) in
+        guard error == nil, let image = UIImage(data: data!) else {
+          DispatchQueue.main.async {
+            completion(nil, error)
+          }
+          return
+        }
+        self.cache.setObject(image, forKey: urlString as NSString)
+        DispatchQueue.main.async {
+          completion(image, nil)
+        }
+      }).resume()
     }
   }
 }

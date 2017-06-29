@@ -3,7 +3,7 @@
  * FILE:	SearchViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Search Tweet
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Wed, Jun 28 2017
+ * UPDATED:	Thu, Jun 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -214,8 +214,8 @@ extension SearchViewController: TimelineViewDelegate
         else {
           dump(mention)
         }
-      case .image(let image):
-        self.presentImage(image)
+      case .image(let media, let image):
+        self.presentImage(image, with: media)
     }
   }
 

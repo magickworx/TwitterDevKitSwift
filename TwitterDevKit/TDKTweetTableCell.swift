@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Mon, Jun 26 2017
+ * UPDATED:	Thu, Jun 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -65,6 +65,8 @@ public class TDKTweetTableCell: UITableViewCell
 
   var clickableTweetMap: [String:[String:(NSRange,Any)]]? = nil
   var clickableQuoteMap: [String:[String:(NSRange,Any)]]? = nil
+
+  var mediaArray: [TDKMedia] = [] // 添付画像管理用
 
   public var tweet: TDKTweet? = nil {
     didSet {
@@ -149,7 +151,7 @@ public class TDKTweetTableCell: UITableViewCell
     let   lineSpace: CGFloat = 4.0
     let    iconSize: CGFloat = 48.0
     let      margin: CGFloat = 8.0
-    let   maxHeight: CGFloat = 99999.0
+    let   maxHeight: CGFloat = CGFloat(CGFloat.greatestFiniteMagnitude)
 
     let  width: CGFloat = self.contentView.frame.size.width
     var height: CGFloat = self.contentView.frame.size.height
@@ -299,6 +301,8 @@ public class TDKTweetTableCell: UITableViewCell
     retweetDate.text = nil
     mediaView.image = nil
 
+    mediaArray.removeAll()
+
     super.prepareForReuse()
   }
 
@@ -335,14 +339,7 @@ extension TDKTweetTableCell
         quotedView.layer.masksToBounds = true
       }
       if let media = quotedStatus.entities?.media {
-        for medium in media {
-          if let type = medium.type, let mediaUrlHttps = medium.mediaUrlHttps {
-            if type.lowercased() == "photo" {
-              self.fetchImage(with: mediaUrlHttps, quoted: true)
-              break
-            }
-          }
-        }
+        self.fetchMedia(media, quoted: true)
       }
     }
 
@@ -388,14 +385,7 @@ extension TDKTweetTableCell
     }
 
     if let media = status.entities?.media {
-      for medium in media {
-        if let type = medium.type, let mediaUrlHttps = medium.mediaUrlHttps {
-          if type.lowercased() == "photo" {
-            self.fetchImage(with: mediaUrlHttps, quoted: false)
-            break
-          }
-        }
-      }
+      self.fetchMedia(media)
     }
 
     if let coordinates = status.coordinates, coordinates.type.lowercased() == "point" {
@@ -540,7 +530,7 @@ extension TDKTweetTableCell
       }
       if let delegate = self.delegate, let tweet = self.tweet {
         if let view = gesture.view as? UIImageView, let image = view.image {
-          let action = TDKClickableActionType.image(image)
+          let action = TDKClickableActionType.image(mediaArray, image)
           delegate.clickableAction(action, in: tweet)
         }
       }
@@ -556,16 +546,63 @@ extension TDKTweetTableCell
 {
   func fetchUserIcon(with urlString: String) {
     TDKImageCacheLoader.shared.fetchImage(with: urlString, completion: {
-      (image: UIImage) in
-      self.iconView.setImage(image, for: .normal)
-      self.iconView.backgroundColor = .clear
-      let bounds = self.iconView.bounds
-      let radius = bounds.width * 0.5
-      let maskPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
-      let maskLayer = CAShapeLayer()
-      maskLayer.path = maskPath.cgPath
-      self.iconView.layer.mask = maskLayer;
+      [weak self] (image: UIImage?, error: Error?) in
+      guard error == nil else { return }
+      if let weakSelf = self, let image = image {
+        weakSelf.iconView.setImage(image, for: .normal)
+        weakSelf.iconView.backgroundColor = .clear
+        let bounds = weakSelf.iconView.bounds
+        let radius = bounds.width * 0.5
+        let maskPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
+        let maskLayer = CAShapeLayer()
+        maskLayer.path = maskPath.cgPath
+        weakSelf.iconView.layer.mask = maskLayer;
+      }
     })
+  }
+
+  func fetchMedia(_ mediaArray: [TDKMedia], quoted: Bool = false) {
+    let width = Float(self.contentView.bounds.size.width)
+    for media in mediaArray {
+      if let type = media.type, let mediaUrlHttps = media.mediaUrlHttps {
+        if type.lowercased() == "photo" {
+          var   url: String = mediaUrlHttps
+          var  size: String = "medium" // tiwtter default
+          var ratio:  Float = Float(Float.greatestFiniteMagnitude)
+          // 画面の横幅の比率に応じてサイズを自動決定するよ
+          if let sizes = media.sizes {
+            if let large = sizes.large {
+              let w = Float(large.w)
+              let r = w < width ? width / w : w / width
+              if r > 1.0 && r < ratio {
+                 size = "large"
+                ratio = r
+              }
+            }
+            if let medium = sizes.medium {
+              let w = Float(medium.w)
+              let r = w < width ? width / w : w / width
+              if r > 1.0 && r < ratio {
+                 size = "medium"
+                ratio = r
+              }
+            }
+            if let small = sizes.small {
+              let w = Float(small.w)
+              let r = w < width ? width / w : w / width
+              if r > 1.0 && r < ratio {
+                 size = "small"
+                ratio = r
+              }
+            }
+          }
+          url = url + ":" + size
+          self.fetchImage(with: url, quoted: quoted)
+          self.mediaArray.append(media)
+          break
+        }
+      }
+    }
   }
 
   func fetchImage(with urlString: String, quoted: Bool = false) {
@@ -578,21 +615,21 @@ extension TDKTweetTableCell
       let config = URLSessionConfiguration.default
       let session = URLSession(configuration: config)
       session.dataTask(with: req, completionHandler: {
-        (data, response, error) in
+        [weak self] (data, response, error) in
         if error == nil {
-          if let imageData = data, let image = UIImage(data: imageData) {
+          if let weakSelf = self, let imageData = data, let image = UIImage(data: imageData) {
             DispatchQueue.main.async {
               let w = image.size.width
               let h = image.size.height
               if quoted {
-                self.quotedMedia.contentMode = w < h ? .center : .scaleAspectFit
-                self.quotedMedia.image = image
+                weakSelf.quotedMedia.contentMode = w < h ? .center : .scaleAspectFit
+                weakSelf.quotedMedia.image = image
               }
               else {
-                self.mediaView.contentMode = w < h ? .center : .scaleAspectFit
-                self.mediaView.image = image
+                weakSelf.mediaView.contentMode = w < h ? .center : .scaleAspectFit
+                weakSelf.mediaView.image = image
               }
-              self.contentView.setNeedsDisplay()
+              weakSelf.contentView.setNeedsDisplay()
             }
           }
           else {

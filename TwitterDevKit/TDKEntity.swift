@@ -3,7 +3,7 @@
  * FILE:	TDKEntity.swift
  * DESCRIPTION:	TwitterDevKit: Defines Classes and Structures for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Tue, Jun 27 2017
+ * UPDATED:	Thu, Jun 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -69,9 +69,9 @@ public struct TDKHashtag {
 public struct TDKSize {
   public internal(set) var w: Int = 0 // Width in pixels
   public internal(set) var h: Int = 0 // Height in pixels
-  public internal(set) var resize: String? = nil
+  public internal(set) var resize: String = "fit" // "crop" or "fit"
 
-  public init(with w: Int = 0, h: Int = 0, resize: String? = nil) {
+  public init(with w: Int = 0, h: Int = 0, resize: String = "fit") {
     self.w = w
     self.h = h
     self.resize = resize

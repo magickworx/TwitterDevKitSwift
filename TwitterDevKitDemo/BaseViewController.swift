@@ -3,7 +3,7 @@
  * FILE:	BaseViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Application Base View Controller
  * DATE:	Fri, Jun  2 2017
- * UPDATED:	Sat, Jun 24 2017
+ * UPDATED:	Thu, Jun 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -44,6 +44,7 @@ import Foundation
 import UIKit
 import Social
 import SafariServices
+import TwitterDevKit
 
 class BaseViewController: UIViewController
 {
@@ -128,6 +129,39 @@ extension BaseViewController
       viewController.modalTransitionStyle = .crossDissolve
       viewController.view.backgroundColor = .black
       self.showModal(viewController, animated: true, completion: nil)
+    }
+  }
+
+  public func presentImage(_ image: UIImage, with media: [TDKMedia]) {
+    if media.isEmpty {
+      self.presentImage(image)
+    }
+    else {
+      if let mediaUrlHttps = media.first?.mediaUrlHttps {
+        var urlString = mediaUrlHttps
+        if let sizes = media.first?.sizes {
+          if sizes.large != nil {
+            urlString += ":large"
+          }
+          else if sizes.medium != nil {
+            urlString += ":medium"
+          }
+          else if sizes.small != nil {
+            urlString += ":small"
+          }
+        }
+        TDKImageCacheLoader.shared.fetchPhoto(with: urlString, cachedTime: 180, completion: {
+          [weak self] (fetchedImage: UIImage?, error: Error?) in
+          if let weakSelf = self {
+            if let image = fetchedImage {
+              weakSelf.presentImage(image)
+            }
+            else {
+              weakSelf.presentImage(image)
+            }
+          }
+        })
+      }
     }
   }
 }

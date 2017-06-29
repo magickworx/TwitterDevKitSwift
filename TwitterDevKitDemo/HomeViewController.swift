@@ -3,7 +3,7 @@
  * FILE:	HomeViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show Home Timeline
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Mon, Jun 26 2017
+ * UPDATED:	Thu, Jun 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -233,8 +233,8 @@ extension HomeViewController: TimelineViewDelegate
         else {
           dump(mention)
         }
-      case .image(let image):
-        self.presentImage(image)
+      case .image(let media, let image):
+        self.presentImage(image, with: media)
     }
   }
 
