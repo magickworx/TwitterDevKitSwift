@@ -3,7 +3,7 @@
  * FILE:	TDKPrettyPrint.swift
  * DESCRIPTION:	TwitterDevKit: Pretty Formatter for Tweet
  * DATE:	Wed, Jun 14 2017
- * UPDATED:	Wed, Jun 28 2017
+ * UPDATED:	Tue, Jul 11 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -132,7 +132,12 @@ extension TDKTweet
 extension TDKTweet
 {
   public func prettyPrinted(with attributes: [TDKTweetAttribute:[String:Any]]? = nil) -> (text: NSAttributedString?, clickable: [String:[String:(NSRange,Any)]]?) {
-    guard let text = self.displayedText else { return (nil, nil) }
+    guard var text = self.displayedText else { return (nil, nil) }
+
+    // XXX: 特定のクライアントの投稿のエスケープ処理に対応
+    text = text.replacingOccurrences(of: "&amp;", with: "&")
+    text = text.replacingOccurrences(of: "&lt;", with: "<")
+    text = text.replacingOccurrences(of: "&gt;", with: ">")
 
     let tweetString = NSMutableAttributedString(string: text)
     let tweetLength = tweetString.length
