@@ -1,8 +1,8 @@
 /*****************************************************************************
  *
- * FILE:	TDKTimeline.swift
- * DESCRIPTION:	TwitterDevKit: Timeline for Tweet
- * DATE:	Thu, Jun 22 2017
+ * FILE:	TDKDate.swift
+ * DESCRIPTION:	TwitterDevKit: Date Structure for Entity of Twitter
+ * DATE:	Sat, Jun 10 2017
  * UPDATED:	Wed, Jul 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
@@ -42,45 +42,22 @@
 
 import Foundation
 
-public class TDKTimeline
-{
-  public var total: Int {
-    return statuses.count
+public struct TDKDate {
+  public internal(set) var dateString: String? = nil
+  public internal(set) var date: Date? = nil
+
+  // UTC time like "Wed Aug 27 13:08:45 +0000 2008"
+  public init(with dateStr: String) {
+    self.dateString = dateStr
+
+    let dateFormatter = DateFormatter()
+    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+    dateFormatter.dateFormat = "EEE MMM dd HH:mm:ss ZZZZ yyyy"
+    self.date = dateFormatter.date(from: dateStr)
   }
 
-  var statuses: JSON
-
-  public init(with statuses: JSON) {
-    self.statuses = statuses
-  }
-}
-
-// MARK: - Sequence
-extension TDKTimeline: Sequence
-{
-  public func makeIterator() -> AnyIterator<TDKTweet> {
-    guard statuses.count > 0 else {
-      return AnyIterator { nil }
-    }
-
-    var index = 0
-    return AnyIterator {
-      guard index < self.statuses.count else { return nil }
-      let status = self.statuses[index]
-      index += 1
-
-      return TDKTweet(status)
-    }
-  }
-}
-
-extension TDKTimeline
-{
-  public subscript(index: Int) -> TDKTweet? {
-    let count = statuses.count
-    guard count > 0, index < count, index >= 0 else { return nil }
-
-    let status = statuses[index]
-    return TDKTweet(status)
+  public var localizedDateString: String? {
+    guard let date = self.date else { return nil }
+    return DateFormatter.localizedString(from: date, dateStyle: .long, timeStyle: .medium)
   }
 }

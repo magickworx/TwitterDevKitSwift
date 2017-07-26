@@ -28,14 +28,17 @@
 		B3373CA91EFAAE020038BC7C /* UserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3373CA81EFAAE020038BC7C /* UserViewController.swift */; };
 		B3373CAB1EFADF9F0038BC7C /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3373CAA1EFADF9F0038BC7C /* SearchViewController.swift */; };
 		B343E0251EF96D3F00D674BD /* TDKClickableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B343E0241EF96D3F00D674BD /* TDKClickableAction.swift */; };
+		B347D4BB1F2873E500B14C9E /* TDKDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4B71F2873E500B14C9E /* TDKDate.swift */; };
+		B347D4BC1F2873E500B14C9E /* TDKEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4B81F2873E500B14C9E /* TDKEntities.swift */; };
+		B347D4BD1F2873E500B14C9E /* TDKPlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4B91F2873E500B14C9E /* TDKPlaces.swift */; };
+		B347D4BE1F2873E500B14C9E /* TDKTweet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4BA1F2873E500B14C9E /* TDKTweet.swift */; };
+		B347D4C01F2873EC00B14C9E /* TDKUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4BF1F2873EC00B14C9E /* TDKUser.swift */; };
 		B383E5FF1EF7A832004E71A6 /* TwitterDevKit.h in Headers */ = {isa = PBXBuildFile; fileRef = B383E5FD1EF7A832004E71A6 /* TwitterDevKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B383E60F1EF7A868004E71A6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E60E1EF7A868004E71A6 /* AppDelegate.swift */; };
 		B383E6161EF7A868004E71A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B383E6151EF7A868004E71A6 /* Assets.xcassets */; };
 		B383E6191EF7A868004E71A6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B383E6171EF7A868004E71A6 /* LaunchScreen.storyboard */; };
-		B383E62B1EF844E1004E71A6 /* TDKEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6241EF844E1004E71A6 /* TDKEntity.swift */; };
 		B383E62C1EF844E1004E71A6 /* TDKImageCacheLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6251EF844E1004E71A6 /* TDKImageCacheLoader.swift */; };
 		B383E62D1EF844E1004E71A6 /* TDKJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6261EF844E1004E71A6 /* TDKJSON.swift */; };
-		B383E62E1EF844E1004E71A6 /* TDKParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6271EF844E1004E71A6 /* TDKParser.swift */; };
 		B383E62F1EF844E1004E71A6 /* TDKPrettyPrint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6281EF844E1004E71A6 /* TDKPrettyPrint.swift */; };
 		B383E6301EF844E1004E71A6 /* TDKTweetTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6291EF844E1004E71A6 /* TDKTweetTableCell.swift */; };
 		B383E6311EF844E1004E71A6 /* TDKTwitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */; };
@@ -79,6 +82,11 @@
 		B3373CA81EFAAE020038BC7C /* UserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewController.swift; sourceTree = "<group>"; };
 		B3373CAA1EFADF9F0038BC7C /* SearchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		B343E0241EF96D3F00D674BD /* TDKClickableAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKClickableAction.swift; sourceTree = "<group>"; };
+		B347D4B71F2873E500B14C9E /* TDKDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKDate.swift; sourceTree = "<group>"; };
+		B347D4B81F2873E500B14C9E /* TDKEntities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKEntities.swift; sourceTree = "<group>"; };
+		B347D4B91F2873E500B14C9E /* TDKPlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKPlaces.swift; sourceTree = "<group>"; };
+		B347D4BA1F2873E500B14C9E /* TDKTweet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweet.swift; sourceTree = "<group>"; };
+		B347D4BF1F2873EC00B14C9E /* TDKUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKUser.swift; sourceTree = "<group>"; };
 		B383E5FB1EF7A832004E71A6 /* TwitterDevKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TwitterDevKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B383E5FD1EF7A832004E71A6 /* TwitterDevKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TwitterDevKit.h; sourceTree = "<group>"; };
 		B383E5FE1EF7A832004E71A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -87,10 +95,8 @@
 		B383E6151EF7A868004E71A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B383E6181EF7A868004E71A6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B383E61A1EF7A868004E71A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B383E6241EF844E1004E71A6 /* TDKEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKEntity.swift; sourceTree = "<group>"; };
 		B383E6251EF844E1004E71A6 /* TDKImageCacheLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKImageCacheLoader.swift; sourceTree = "<group>"; };
 		B383E6261EF844E1004E71A6 /* TDKJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKJSON.swift; sourceTree = "<group>"; };
-		B383E6271EF844E1004E71A6 /* TDKParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKParser.swift; sourceTree = "<group>"; };
 		B383E6281EF844E1004E71A6 /* TDKPrettyPrint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKPrettyPrint.swift; sourceTree = "<group>"; };
 		B383E6291EF844E1004E71A6 /* TDKTweetTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweetTableCell.swift; sourceTree = "<group>"; };
 		B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTwitter.swift; sourceTree = "<group>"; };
@@ -141,13 +147,16 @@
 		B383E5FC1EF7A832004E71A6 /* TwitterDevKit */ = {
 			isa = PBXGroup;
 			children = (
+				B347D4BF1F2873EC00B14C9E /* TDKUser.swift */,
+				B347D4B71F2873E500B14C9E /* TDKDate.swift */,
+				B347D4B81F2873E500B14C9E /* TDKEntities.swift */,
+				B347D4B91F2873E500B14C9E /* TDKPlaces.swift */,
+				B347D4BA1F2873E500B14C9E /* TDKTweet.swift */,
 				B30C463B1EFB947B00F61030 /* TDKParameters.swift */,
 				B30C463C1EFB947B00F61030 /* TDKTimeline.swift */,
 				B343E0241EF96D3F00D674BD /* TDKClickableAction.swift */,
-				B383E6241EF844E1004E71A6 /* TDKEntity.swift */,
 				B383E6251EF844E1004E71A6 /* TDKImageCacheLoader.swift */,
 				B383E6261EF844E1004E71A6 /* TDKJSON.swift */,
-				B383E6271EF844E1004E71A6 /* TDKParser.swift */,
 				B383E6281EF844E1004E71A6 /* TDKPrettyPrint.swift */,
 				B383E6291EF844E1004E71A6 /* TDKTweetTableCell.swift */,
 				B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */,
@@ -328,12 +337,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				B30C463E1EFB947B00F61030 /* TDKTimeline.swift in Sources */,
+				B347D4C01F2873EC00B14C9E /* TDKUser.swift in Sources */,
 				B30C463D1EFB947B00F61030 /* TDKParameters.swift in Sources */,
 				B383E62F1EF844E1004E71A6 /* TDKPrettyPrint.swift in Sources */,
-				B383E62B1EF844E1004E71A6 /* TDKEntity.swift in Sources */,
+				B347D4BE1F2873E500B14C9E /* TDKTweet.swift in Sources */,
+				B347D4BD1F2873E500B14C9E /* TDKPlaces.swift in Sources */,
 				B383E62D1EF844E1004E71A6 /* TDKJSON.swift in Sources */,
-				B383E62E1EF844E1004E71A6 /* TDKParser.swift in Sources */,
 				B383E6301EF844E1004E71A6 /* TDKTweetTableCell.swift in Sources */,
+				B347D4BB1F2873E500B14C9E /* TDKDate.swift in Sources */,
+				B347D4BC1F2873E500B14C9E /* TDKEntities.swift in Sources */,
 				B383E62C1EF844E1004E71A6 /* TDKImageCacheLoader.swift in Sources */,
 				B343E0251EF96D3F00D674BD /* TDKClickableAction.swift in Sources */,
 				B383E6311EF844E1004E71A6 /* TDKTwitter.swift in Sources */,
