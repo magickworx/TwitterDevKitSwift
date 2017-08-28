@@ -3,7 +3,7 @@
  * FILE:	TDKParameters.swift
  * DESCRIPTION:	TwitterDevKit: REST API Parameters for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Mon, Jun 26 2017
+ * UPDATED:	Sat, Aug 26 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -45,7 +45,8 @@ import Foundation
 let kDefaultCount: Int = 20
 
 // MARK: - Parameters to fetch timeline
-public class TDKTimelineCommonParameters {
+public class TDKTimelineCommonParameters
+{
   public internal(set) var count: Int = kDefaultCount
 
   public var sinceId: Int64 = 0
@@ -77,7 +78,8 @@ public class TDKTimelineCommonParameters {
 }
 
 // https://dev.twitter.com/rest/reference/get/statuses/home_timeline
-public class TDKHomeTimelineParameters: TDKTimelineCommonParameters {
+public class TDKHomeTimelineParameters: TDKTimelineCommonParameters
+{
   public var includeEntities: Bool = true
 
   override public func toJSON() -> [String:Any] {
@@ -88,7 +90,8 @@ public class TDKHomeTimelineParameters: TDKTimelineCommonParameters {
 }
 
 // https://dev.twitter.com/rest/reference/get/statuses/user_timeline
-public class TDKUserTimelineParameters: TDKTimelineCommonParameters {
+public class TDKUserTimelineParameters: TDKTimelineCommonParameters
+{
   public internal(set) var userId: Int64 = 0
   public internal(set) var screenName: String? = nil
   public var includeRts: Bool = true
@@ -124,7 +127,8 @@ public class TDKUserTimelineParameters: TDKTimelineCommonParameters {
  *
  * https://dev.twitter.com/rest/public/search
  */
-public class TDKSearchTweetParameters {
+public struct TDKSearchTweetParameters
+{
   public internal(set) var count: Int = kDefaultCount
 
   public var geocode: String? = nil
@@ -183,7 +187,8 @@ public class TDKSearchTweetParameters {
 /*
  * https://dev.twitter.com/rest/reference/get/favorites/list
  */
-public class TDKFavoritesParameters {
+public struct TDKFavoritesParameters
+{
   public internal(set) var count: Int = kDefaultCount
 
   public var userId: Int64 = 0
@@ -212,6 +217,41 @@ public class TDKFavoritesParameters {
     }
     if maxId > 0 {
       json["max_id"] = String(maxId)
+    }
+    json["include_entities"] = String(includeEntities)
+    return json
+  }
+}
+
+// MARK: - Parameters to lookup user
+/*
+ * GET users/lookup - Twitter Developers
+ * https://dev.twitter.com/rest/reference/get/users/lookup
+ *
+ * GET users/show - Twitter Developers
+ * https://dev.twitter.com/rest/reference/get/users/show
+ */
+public struct TDKLookupUserParameters
+{
+  public internal(set) var userId: Int64 = 0
+  public internal(set) var screenName: String? = nil
+  public var includeEntities: Bool = true
+
+  public init(with screenName: String) {
+    self.screenName = screenName
+  }
+
+  public init(with userId: Int64) {
+    self.userId = userId
+  }
+
+  public func toJSON() -> [String:Any] {
+    var json: [String:Any] = [:]
+    if userId > 0 {
+      json["user_id"] = String(userId)
+    }
+    if let screenName = screenName {
+      json["screen_name"] = screenName
     }
     json["include_entities"] = String(includeEntities)
     return json

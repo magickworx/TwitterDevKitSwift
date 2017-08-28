@@ -3,7 +3,7 @@
  * FILE:	TDKClickableAction.swift
  * DESCRIPTION:	TwitterDevKit: Clickable Action Protocol for Tweet Contents
  * DATE:	Tue, Jun 20 2017
- * UPDATED:	Thu, Jun 29 2017
+ * UPDATED:	Tue, Aug 22 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -51,6 +51,7 @@ public enum TDKClickableActionType
   case url(TDKURL, String)
   case mention(TDKUserMention, String)
   case image([TDKMedia], UIImage)
+  case video(TDKMedia)
 }
 
 public protocol TDKClickableActionDelegate: class

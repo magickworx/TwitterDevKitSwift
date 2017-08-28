@@ -3,7 +3,7 @@
  * FILE:	TDKTimeline.swift
  * DESCRIPTION:	TwitterDevKit: Timeline for Tweet
  * DATE:	Thu, Jun 22 2017
- * UPDATED:	Wed, Jul 26 2017
+ * UPDATED:	Sun, Aug 20 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -81,6 +81,18 @@ extension TDKTimeline
     guard count > 0, index < count, index >= 0 else { return nil }
 
     let status = statuses[index]
+    return TDKTweet(status)
+  }
+
+  public var first: TDKTweet? {
+    return self[0]
+  }
+
+  public var last: TDKTweet? {
+    let total = statuses.count
+    guard total > 0 else { return nil }
+
+    let status = statuses[total - 1]
     return TDKTweet(status)
   }
 }

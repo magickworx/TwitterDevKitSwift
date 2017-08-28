@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Thu, Jun 29 2017
+ * UPDATED:	Sun, Aug 27 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -50,18 +50,21 @@ public class TDKTweetTableCell: UITableViewCell
   let iconView: UIButton = UIButton(type: .custom)
   let nameLabel: UILabel = UILabel()
   let screenLabel: UILabel = UILabel()
-  let tweetLabel: UILabel = UILabel()
+  let tweetLabel: TDKTweetLabel = TDKTweetLabel()
   let dateLabel: UILabel = UILabel()
 
   let quotedView: UIView = UIView()
   let quotedName: UILabel = UILabel()
   let quotedScreen: UILabel = UILabel()
-  let quotedTweet: UILabel = UILabel()
+  let quotedTweet: TDKTweetLabel = TDKTweetLabel()
   let quotedMedia: UIImageView = UIImageView()
 
   let retweetLabel: UILabel = UILabel()
   let retweetDate: UILabel = UILabel()
+
   let mediaView: UIImageView = UIImageView()
+  let playbackButton: UIButton = UIButton()
+  let playbackLabel: UILabel = UILabel()
 
   var clickableTweetMap: [String:[String:(NSRange,Any)]]? = nil
   var clickableQuoteMap: [String:[String:(NSRange,Any)]]? = nil
@@ -104,44 +107,90 @@ public class TDKTweetTableCell: UITableViewCell
 
     iconView.backgroundColor = .lightGray
 
-    nameLabel.font = UIFont.boldSystemFont(ofSize: 14.0)
+    nameLabel.font = UIFont.boldSystemFont(ofSize: 15.0)
 
-    screenLabel.font = UIFont.systemFont(ofSize: 14.0)
+    screenLabel.font = UIFont.systemFont(ofSize: 15.0)
     screenLabel.textColor = .darkGray
 
-    tweetLabel.font = UIFont.systemFont(ofSize: 16.0)
+    tweetLabel.font = UIFont.systemFont(ofSize: 18.0)
     tweetLabel.numberOfLines = 0
     tweetLabel.lineBreakMode = .byWordWrapping
+    tweetLabel.textColor = UIColor(red: 43.0/255, green: 43.0/255, blue: 43.0/255, alpha: 1)
+    tweetLabel.activeAttribute = { (attributes, activeType, isSelected) in
+      let hexColor = { (_ hex: UInt32) -> UIColor in
+        let   red: CGFloat = CGFloat((hex & 0xff0000) >> 16) / 255.0
+        let green: CGFloat = CGFloat((hex &   0xff00) >>  8) / 255.0
+        let  blue: CGFloat = CGFloat((hex &     0xff)) / 255.0
+        return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
+      }
+      var attrs = attributes
+      switch activeType {
+        case .hashtag:
+          if !isSelected {
+            attrs[NSForegroundColorAttributeName] = hexColor(0x7f7fff)
+          }
+          break
+        case .mention:
+          if !isSelected {
+            attrs[NSForegroundColorAttributeName] = hexColor(0xff7f7f)
+          }
+          break
+        case .url:
+          if !isSelected {
+            attrs[NSForegroundColorAttributeName] = hexColor(0x7fbfff)
+          }
+        case .media:
+          if !isSelected {
+            attrs[NSForegroundColorAttributeName] = hexColor(0xffbf7f)
+          }
+          break
+      }
+      return attrs
+    }
 
-    dateLabel.font = UIFont.systemFont(ofSize: 14.0)
+    dateLabel.font = UIFont.systemFont(ofSize: 15.0)
     dateLabel.textAlignment = .right
 
     quotedView.backgroundColor = .clear
-    quotedName.font = UIFont.boldSystemFont(ofSize: 14.0)
-    quotedScreen.font = UIFont.systemFont(ofSize: 14.0)
+    quotedName.font = UIFont.boldSystemFont(ofSize: 16.0)
+    quotedScreen.font = UIFont.systemFont(ofSize: 16.0)
     quotedScreen.textColor = .darkGray
     quotedTweet.backgroundColor = .clear
-    quotedTweet.font = UIFont.systemFont(ofSize: 14.0)
+    quotedTweet.font = UIFont.systemFont(ofSize: 16.0)
     quotedTweet.numberOfLines = 0
     quotedTweet.lineBreakMode = .byWordWrapping
     quotedMedia.clipsToBounds = true
 
-    retweetLabel.font = UIFont.systemFont(ofSize: 12.0)
+    retweetLabel.font = UIFont.systemFont(ofSize: 14.0)
     retweetLabel.textColor = .lightGray
-    retweetDate.font = UIFont.systemFont(ofSize: 12.0)
+    retweetDate.font = UIFont.systemFont(ofSize: 14.0)
     retweetDate.textColor = .lightGray
     retweetDate.textAlignment = .right
 
     mediaView.clipsToBounds = true
+    mediaView.addSubview(playbackButton)
+    if let image = playbackIcon() {
+      playbackButton.setBackgroundImage(image, for: .normal)
+      playbackButton.frame = CGRect(x: 0.0, y: 0.0, width: image.size.width, height: image.size.height)
+      playbackButton.addTarget(self, action: #selector(playbackHandler), for: .touchUpInside)
+    }
+    playbackButton.isHidden = true
 
-    self.prepareTapHandlers()
+    playbackLabel.font = UIFont.systemFont(ofSize: 10.0)
+    playbackLabel.backgroundColor = UIColor(white: 0.0, alpha: 0.3)
+    playbackLabel.textColor = .white
+    playbackLabel.textAlignment = .center
+    playbackLabel.isHidden = true
+    mediaView.addSubview(playbackLabel)
+
+    prepareTapHandlers()
   }
 
-  override public func draw(_ rect: CGRect) {
+  public override func draw(_ rect: CGRect) {
     super.draw(rect)
   }
 
-  override public func layoutSubviews() {
+  public override func layoutSubviews() {
     super.layoutSubviews()
     // 以下に必要なコードを記述する
   }
@@ -173,25 +222,8 @@ public class TDKTweetTableCell: UITableViewCell
     screenLabel.frame = CGRect(x: x, y: y, width: w, height: h)
     y += (h + s)
 
-    if let text = tweetLabel.attributedText {
-      let constraintSize = CGSize(width: w, height: maxHeight)
-      let size = text.boundingRect(with: constraintSize, options: .usesLineFragmentOrigin, context: nil).size
-      h = size.height
-    }
-    else if let text = tweetLabel.text {
-      var lang: String = Locale.preferredLanguages[0]
-      lang = lang.substring(to: lang.index(lang.startIndex, offsetBy: 2))
-      let paragraphStyle = NSMutableParagraphStyle()
-      paragraphStyle.lineBreakMode = tweetLabel.lineBreakMode
-      let attributes: [String:Any] = [
-        kCTLanguageAttributeName as String : lang, // 禁則処理を言語に合わせる
-        NSFontAttributeName : tweetLabel.font,
-        NSParagraphStyleAttributeName : paragraphStyle
-      ]
-      let constraintSize = CGSize(width: w, height: maxHeight)
-      let size = text.boundingRect(with: constraintSize, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
-      h = size.height
-    }
+    let size = tweetLabel.suitableContentSize(width: w, height: maxHeight)
+    h = ceil(size.height)
     tweetLabel.frame = CGRect(x: x, y: y, width: w, height: h)
     y += (h + s)
 
@@ -208,13 +240,12 @@ public class TDKTweetTableCell: UITableViewCell
           NSParagraphStyleAttributeName : paragraphStyle
         ]
         let qw: CGFloat = w - m * 2.0
-        let constraintSize = CGSize(width: qw, height: maxHeight)
-        let size = text.boundingRect(with: constraintSize, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
-        let qh: CGFloat = size.height + m * 2.0
+        let size = quotedTweet.suitableContentSize(width: qw, height: maxHeight)
+        let qh: CGFloat = ceil(size.height + m * 2.0)
         h = lineHeight + lineHeight + s + qh + s
         if let quoted = self.tweet?.quotedStatus {
-          if let media = quoted.entities?.media, !media.isEmpty {
-            let th = floor(qw * 0.75)
+          if let media = getMedia(of: quoted), !media.isEmpty {
+            let th = ceil(qw * 0.75)
             quotedMedia.frame = CGRect(x: m, y: h, width: qw, height: th)
             h += (th + m)
           }
@@ -269,10 +300,22 @@ public class TDKTweetTableCell: UITableViewCell
       if let retweetedStatus = tweet.retweetedStatus {
         status = retweetedStatus
       }
-      if let media = status.entities?.media, !media.isEmpty {
-        h = floor(w * 0.75)
+      if let media = getMedia(of: status), !media.isEmpty {
+        h = ceil(w * 0.75)
         mediaView.frame = CGRect(x: x, y: y, width: w, height: h)
+        playbackButton.center = CGPoint(x: w * 0.5, y: h * 0.5)
         y += h
+
+        if let videoInfo = media.first?.videoInfo, videoInfo.durationMillis > 0 {
+          var sec = videoInfo.durationMillis / 1000
+          let min = sec / 60
+          sec = sec % 60
+          playbackLabel.text = String(format: "%02zd:%02zd", min, sec)
+          playbackLabel.frame = CGRect(x: 8.0, y: h - 28.0, width: 36.0, height: 24.0)
+          playbackLabel.sizeToFit()
+          playbackLabel.isHidden = false
+          mediaView.backgroundColor = .black
+        }
       }
       else {
         mediaView.frame = CGRect.zero
@@ -285,7 +328,7 @@ public class TDKTweetTableCell: UITableViewCell
     return CGSize(width: width, height: height)
   }
 
-  override public func prepareForReuse() {
+  public override func prepareForReuse() {
     iconView.setImage(nil, for: .normal)
     nameLabel.text = nil
     screenLabel.text = nil
@@ -299,14 +342,18 @@ public class TDKTweetTableCell: UITableViewCell
 
     retweetLabel.text = nil
     retweetDate.text = nil
+
     mediaView.image = nil
+    mediaView.backgroundColor = .white
+    playbackButton.isHidden = true
+    playbackLabel.isHidden = true
 
     mediaArray.removeAll()
 
     super.prepareForReuse()
   }
 
-  override public func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
+  public override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
     return self.calculatesLayoutSubviews()
   }
 }
@@ -316,32 +363,6 @@ extension TDKTweetTableCell
 {
   func composeTweet() {
     guard let tweet = self.tweet else { return }
-    if let quotedStatus = tweet.quotedStatus {
-      let pretty = quotedStatus.prettyPrinted()
-      if let clickable = pretty.clickable {
-        if clickable.count > 0 {
-          clickableQuoteMap = clickable
-        }
-      }
-      if let user = quotedStatus.user {
-        if let name = user.name {
-          quotedName.text = name
-        }
-        if let screen = user.screenName {
-          quotedScreen.text = "@" + screen
-        }
-      }
-      if let text = pretty.text {
-        quotedTweet.attributedText = text
-        quotedView.layer.borderWidth = 1.0
-        quotedView.layer.borderColor = UIColor.lightGray.cgColor
-        quotedView.layer.cornerRadius = 4.0
-        quotedView.layer.masksToBounds = true
-      }
-      if let media = quotedStatus.entities?.media {
-        self.fetchMedia(media, quoted: true)
-      }
-    }
 
     var status: TDKTweet = tweet
     if let retweetedStatus = tweet.retweetedStatus {
@@ -354,15 +375,25 @@ extension TDKTweetTableCell
         retweetDate.text = date
       }
     }
+    tweetLabel.tweet = status
 
-    let pretty = status.prettyPrinted()
-    if let clickable = pretty.clickable {
-      if clickable.count > 0 {
-        clickableTweetMap = clickable
+    if let quotedStatus = status.quotedStatus {
+      if let user = quotedStatus.user {
+        if let name = user.name {
+          quotedName.text = name
+        }
+        if let screen = user.screenName {
+          quotedScreen.text = "@" + screen
+        }
+        quotedTweet.tweet = quotedStatus
+        quotedView.layer.borderWidth = 1.0
+        quotedView.layer.borderColor = UIColor.lightGray.cgColor
+        quotedView.layer.cornerRadius = 4.0
+        quotedView.layer.masksToBounds = true
       }
-    }
-    if let text = pretty.text {
-      tweetLabel.attributedText = text
+      if let media = getMedia(of: quotedStatus) {
+        self.fetchMedia(media, quoted: true)
+      }
     }
 
     if let date = status.createdAt?.localizedDateString {
@@ -384,7 +415,7 @@ extension TDKTweetTableCell
       fetchUserIcon(with: url)
     }
 
-    if let media = status.entities?.media {
+    if let media = getMedia(of: status) {
       self.fetchMedia(media)
     }
 
@@ -398,6 +429,16 @@ extension TDKTweetTableCell
       print("sensitive")
     }
   }
+
+  func getMedia(of status: TDKTweet) -> [TDKMedia]? {
+    if let media = status.extendedEntities?.media {
+      return media
+    }
+    else if let media = status.entities?.media {
+      return media
+    }
+    return nil
+  }
 }
 
 // MARK: - Tap Handler
@@ -408,104 +449,18 @@ extension TDKTweetTableCell
 extension TDKTweetTableCell
 {
   func prepareTapHandlers() {
-    tweetLabel.isUserInteractionEnabled = true
-    var tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapTweetHandler))
-    tweetLabel.addGestureRecognizer(tapGesture)
-
-    quotedTweet.isUserInteractionEnabled = true
-    tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapQuoteHandler))
-    quotedTweet.addGestureRecognizer(tapGesture)
+    tweetLabel.delegate = self
+    quotedTweet.delegate = self
 
     iconView.addTarget(self, action: #selector(tapIconHandler), for: .touchUpInside)
 
     quotedMedia.isUserInteractionEnabled = true
-    tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapMediaHandler))
+    var tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapMediaHandler))
     quotedMedia.addGestureRecognizer(tapGesture)
 
     mediaView.isUserInteractionEnabled = true
     tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapMediaHandler))
     mediaView.addGestureRecognizer(tapGesture)
-  }
-
-  func tapTweetHandler(gesture: UITapGestureRecognizer) {
-    if let clickable = self.clickableTweetMap {
-      let tapLocation: CGPoint = gesture.location(in: tweetLabel)
-      self.detectAction(with: clickable, at: tapLocation, in: tweetLabel)
-    }
-  }
-
-  func tapQuoteHandler(gesture: UITapGestureRecognizer) {
-    if let clickable = self.clickableQuoteMap {
-      let tapLocation: CGPoint = gesture.location(in: quotedTweet)
-      self.detectAction(with: clickable, at: tapLocation, in: quotedTweet)
-    }
-  }
-
-  func detectAction(with clickableMap: [String:[String:(NSRange,Any)]], at point: CGPoint, in label: UILabel) {
-    let indexOfCharacter = didTapAttributedText(in: label, at: point)
-
-    clickableMap.forEach {
-      let key: String = $0
-      let val: [String:(NSRange,Any)] = $1
-      for (text, tuple) in val {
-        let (range, entity) = tuple
-        if NSLocationInRange(indexOfCharacter, range) {
-          if let delegate = self.delegate, let tweet = self.tweet {
-            var action: TDKClickableActionType
-            switch key {
-              case "hashtag":
-                guard let hashtag = entity as? TDKHashtag else { return }
-                action = .hashtag(hashtag, text)
-              case "media":
-                guard let media = entity as? TDKMedia else { return }
-                action = .media(media, text)
-              case "url":
-                guard let url = entity as? TDKURL else { return }
-                action = .url(url, text)
-              case "mention":
-                guard let mention = entity as? TDKUserMention else { return }
-                action = .mention(mention, text)
-              default:
-                return
-            }
-            delegate.clickableAction(action, in: tweet)
-          }
-          else {
-            print("\(key): \(text)")
-          }
-        }
-      }
-    }
-  }
-
-  func didTapAttributedText(in label: UILabel, at location: CGPoint) -> Int {
-    if let attributedString = label.attributedText {
-      let attributedText = NSMutableAttributedString(attributedString: attributedString)
-      var lang: String = Locale.preferredLanguages[0]
-      lang = lang.substring(to: lang.index(lang.startIndex, offsetBy: 2))
-      attributedText.addAttributes([
-        kCTLanguageAttributeName as String : lang, // 禁則処理を言語に合わせる
-        NSFontAttributeName: label.font
-      ], range: NSMakeRange(0, attributedString.string.glyphCount))
-      // Create instances of NSLayoutManager, NSTextContainer and NSTextStorage
-      let layoutManager = NSLayoutManager()
-      let textContainer = NSTextContainer(size: label.frame.size)
-      let textStorage = NSTextStorage(attributedString: attributedText)
-      // Configure layoutManager and textStorage
-      layoutManager.addTextContainer(textContainer)
-      layoutManager.usesFontLeading = true
-      textStorage.addLayoutManager(layoutManager)
-      // Configure textContainer
-      textContainer.lineFragmentPadding = 0.0
-      textContainer.lineBreakMode = label.lineBreakMode
-      textContainer.maximumNumberOfLines = label.numberOfLines
-      // get the index of character where user tapped
-      let indexOfCharacter = layoutManager.characterIndex(for: location, in: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
-
-      return indexOfCharacter
-    }
-
-    return -1
   }
 
   func tapIconHandler(sender: UIButton) {
@@ -541,6 +496,26 @@ extension TDKTweetTableCell
   }
 }
 
+extension TDKTweetTableCell: TDKTweetLabelDelegate
+{
+  public func tweetLabel(_ label: TDKTweetLabel, didSelect element: TDKActiveElement) {
+    if let delegate = self.delegate, let tweet = self.tweet {
+      var action: TDKClickableActionType
+      switch element {
+        case .hashtag(let hashtag, let text):
+          action = .hashtag(hashtag, text)
+        case .media(let media, let text):
+          action = .media(media, text)
+        case .url(let url, let text):
+          action = .url(url, text)
+        case .mention(let mention, let text):
+          action = .mention(mention, text)
+      }
+      delegate.clickableAction(action, in: tweet)
+    }
+  }
+}
+
 // MARK: - Downloader
 extension TDKTweetTableCell
 {
@@ -564,8 +539,9 @@ extension TDKTweetTableCell
   func fetchMedia(_ mediaArray: [TDKMedia], quoted: Bool = false) {
     let width = Float(self.contentView.bounds.size.width)
     for media in mediaArray {
-      if let type = media.type, let mediaUrlHttps = media.mediaUrlHttps {
-        if type.lowercased() == "photo" {
+      if let type = media.type?.lowercased(),
+         let mediaUrlHttps = media.mediaUrlHttps {
+        if type == "photo" || type == "video" || type == "animated_gif"{
           var   url: String = mediaUrlHttps
           var  size: String = "medium" // tiwtter default
           var ratio:  Float = Float(Float.greatestFiniteMagnitude)
@@ -599,6 +575,7 @@ extension TDKTweetTableCell
           url = url + ":" + size
           self.fetchImage(with: url, quoted: quoted)
           self.mediaArray.append(media)
+          self.playbackButton.isHidden = type == "photo"
           break
         }
       }
@@ -606,7 +583,7 @@ extension TDKTweetTableCell
   }
 
   func fetchImage(with urlString: String, quoted: Bool = false) {
-    let kCacheTime : TimeInterval = 5 * 60 // 300 seconds
+    let kCacheTime : TimeInterval = 10 * 60 // [seconds]
 
     if let iconUrl = URL(string: urlString) {
       let req = URLRequest(url: iconUrl,
@@ -641,6 +618,96 @@ extension TDKTweetTableCell
         }
         session.finishTasksAndInvalidate()
       }).resume()
+    }
+  }
+}
+
+// MARK: - Icon
+extension TDKTweetTableCell
+{
+  func playbackIcon() -> UIImage? {
+    let  width: CGFloat = 56.0
+    let height: CGFloat = 56.0
+    let   size: CGSize  = CGSize(width: width, height: height)
+    let opaque: Bool    = false
+    let  scale: CGFloat = 0.0
+
+    var x: CGFloat = 0.0
+    var y: CGFloat = 0.0
+    var w: CGFloat = width
+    var h: CGFloat = height
+
+    UIGraphicsBeginImageContextWithOptions(size, opaque, scale)
+
+#if     PREFERER_TWITTER_PLAYBACK_BUTTON_DESIGN
+    var path = UIBezierPath(ovalIn: CGRect(x: x, y: y, width: w, height: h))
+    UIColor.white.setFill()
+    path.fill()
+
+    x = 4.0
+    y = x
+    w = width - x * 2.0
+    h = w
+    path = UIBezierPath(ovalIn: CGRect(x: x, y: y, width: w, height: h))
+    UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0).setFill()
+    path.fill()
+
+    x = 16.0
+    y = 16.0
+    w = width - x * 2.0
+    h = w
+    path = UIBezierPath()
+    path.move(to: CGPoint(x: x + 4.0, y: y))
+    x += w
+    y += (h * 0.5)
+    path.addLine(to: CGPoint(x: x, y: y))
+    x = 20.0
+    y += (h * 0.5)
+    path.addLine(to: CGPoint(x: x, y: y))
+    path.close()
+    UIColor.white.setFill()
+    path.fill()
+#else
+    var path = UIBezierPath(ovalIn: CGRect(x: x, y: y, width: w, height: h))
+    UIColor(white: 0.0, alpha: 0.3).setFill()
+    path.fill()
+
+    x = 14.0
+    y = 14.0
+    w = width - x * 2.0
+    h = w
+    path = UIBezierPath()
+    path.move(to: CGPoint(x: x + 4.0, y: y))
+    x += w
+    y += (h * 0.5)
+    path.addLine(to: CGPoint(x: x, y: y))
+    x = 18.0
+    y += (h * 0.5)
+    path.addLine(to: CGPoint(x: x, y: y))
+    path.close()
+    UIColor.white.setFill()
+    path.fill()
+#endif     // PREFERER_TWITTER_PLAYBACK_BUTTON_DESIGN
+
+    let image = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+
+    return image?.withRenderingMode(.alwaysOriginal)
+  }
+
+  func playbackHandler(sender: UIButton) {
+    if var status = self.tweet {
+      if let retweetedStatus = status.retweetedStatus {
+        status = retweetedStatus
+      }
+      if let delegate = self.delegate, let tweet = self.tweet,
+         let media = getMedia(of: status)?.first {
+        let action = TDKClickableActionType.video(media)
+        delegate.clickableAction(action, in: tweet)
+      }
+      else {
+        dump(getMedia(of: status))
+      }
     }
   }
 }

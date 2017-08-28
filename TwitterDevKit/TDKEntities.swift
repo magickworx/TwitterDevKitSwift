@@ -3,7 +3,7 @@
  * FILE:	TDKEntities.swift
  * DESCRIPTION:	TwitterDevKit: Entities Structures for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Thu, Jun 29 2017
+ * UPDATED:	Tue, Aug 22 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -99,6 +99,49 @@ public struct TDKSizes {
   }
 }
 
+// https://dev.twitter.com/overview/api/entities-in-twitter-objects
+public struct TDKVariant {
+  public internal(set) var bitrate: Int = 0
+  public internal(set) var contentType: String? = nil
+  public internal(set) var url: String? = nil
+
+  public init(_ json: JSON) {
+    if let bitrate = json["bitrate"].int {
+      self.bitrate = bitrate
+    }
+    if let type = json["content_type"].string {
+      self.contentType = type
+    }
+    if let url = json["url"].string {
+      self.url = url
+    }
+  }
+}
+
+// https://dev.twitter.com/overview/api/entities-in-twitter-objects
+public struct TDKVideoInfo {
+  public internal(set) var aspectRatio: [Int] = []
+  public internal(set) var durationMillis: Int = 0
+  public internal(set) var variants: [TDKVariant] = []
+
+  public init(_ json: JSON) {
+    if let ratio = json["aspect_ratio"].array as? [Int] {
+      self.aspectRatio = ratio
+    }
+    if let duration = json["duration_millis"].int {
+      self.durationMillis = duration
+    }
+    if json["variants"].array != nil {
+      let array = json["variants"]
+      var contents: [TDKVariant] = []
+      for item in array {
+        contents.append(TDKVariant(item))
+      }
+      self.variants = contents
+    }
+  }
+}
+
 // https://dev.twitter.com/overview/api/entities
 public struct TDKMedia {
   public internal(set) var id: Int64 = 0
@@ -115,6 +158,8 @@ public struct TDKMedia {
   public internal(set) var mediaUrlHttps: String? = nil
   public internal(set) var sourceStatusId: Int64 = 0
   public internal(set) var sourceStatusIdStr: String? = nil
+  // XXX: extended_entities are as follows.
+  public internal(set) var videoInfo: TDKVideoInfo? = nil
 
   public init(_ json: JSON) {
     if let id = json["id"].int64 {
@@ -156,6 +201,11 @@ public struct TDKMedia {
     }
     if let sval = json["source_status_id_str"].string {
       self.sourceStatusIdStr = sval
+    }
+
+    // XXX: extended_entities are as follows.
+    if json["video_info"].dictionary != nil {
+      self.videoInfo = TDKVideoInfo(json["video_info"])
     }
   }
 }

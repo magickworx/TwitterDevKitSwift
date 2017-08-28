@@ -3,7 +3,7 @@
  * FILE:	UserViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show User Timeline
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Thu, Jun 29 2017
+ * UPDATED:	Sun, Aug 27 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -207,6 +207,8 @@ extension UserViewController: TimelineViewDelegate
         }
       case .image(let media, let image):
         self.presentImage(image, with: media)
+      case .video(let media):
+        self.playbackVideo(media)
     }
   }
 

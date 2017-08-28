@@ -33,13 +33,13 @@
 		B347D4BD1F2873E500B14C9E /* TDKPlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4B91F2873E500B14C9E /* TDKPlaces.swift */; };
 		B347D4BE1F2873E500B14C9E /* TDKTweet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4BA1F2873E500B14C9E /* TDKTweet.swift */; };
 		B347D4C01F2873EC00B14C9E /* TDKUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347D4BF1F2873EC00B14C9E /* TDKUser.swift */; };
+		B37A7A0B1F53C8C800068F43 /* TDKTweetLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37A7A0A1F53C8C800068F43 /* TDKTweetLabel.swift */; };
 		B383E5FF1EF7A832004E71A6 /* TwitterDevKit.h in Headers */ = {isa = PBXBuildFile; fileRef = B383E5FD1EF7A832004E71A6 /* TwitterDevKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B383E60F1EF7A868004E71A6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E60E1EF7A868004E71A6 /* AppDelegate.swift */; };
 		B383E6161EF7A868004E71A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B383E6151EF7A868004E71A6 /* Assets.xcassets */; };
 		B383E6191EF7A868004E71A6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B383E6171EF7A868004E71A6 /* LaunchScreen.storyboard */; };
 		B383E62C1EF844E1004E71A6 /* TDKImageCacheLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6251EF844E1004E71A6 /* TDKImageCacheLoader.swift */; };
 		B383E62D1EF844E1004E71A6 /* TDKJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6261EF844E1004E71A6 /* TDKJSON.swift */; };
-		B383E62F1EF844E1004E71A6 /* TDKPrettyPrint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6281EF844E1004E71A6 /* TDKPrettyPrint.swift */; };
 		B383E6301EF844E1004E71A6 /* TDKTweetTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6291EF844E1004E71A6 /* TDKTweetTableCell.swift */; };
 		B383E6311EF844E1004E71A6 /* TDKTwitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */; };
 		B383E6341EF844ED004E71A6 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6321EF844ED004E71A6 /* BaseViewController.swift */; };
@@ -87,6 +87,7 @@
 		B347D4B91F2873E500B14C9E /* TDKPlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKPlaces.swift; sourceTree = "<group>"; };
 		B347D4BA1F2873E500B14C9E /* TDKTweet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweet.swift; sourceTree = "<group>"; };
 		B347D4BF1F2873EC00B14C9E /* TDKUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKUser.swift; sourceTree = "<group>"; };
+		B37A7A0A1F53C8C800068F43 /* TDKTweetLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweetLabel.swift; sourceTree = "<group>"; };
 		B383E5FB1EF7A832004E71A6 /* TwitterDevKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TwitterDevKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B383E5FD1EF7A832004E71A6 /* TwitterDevKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TwitterDevKit.h; sourceTree = "<group>"; };
 		B383E5FE1EF7A832004E71A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -97,7 +98,6 @@
 		B383E61A1EF7A868004E71A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B383E6251EF844E1004E71A6 /* TDKImageCacheLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKImageCacheLoader.swift; sourceTree = "<group>"; };
 		B383E6261EF844E1004E71A6 /* TDKJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKJSON.swift; sourceTree = "<group>"; };
-		B383E6281EF844E1004E71A6 /* TDKPrettyPrint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKPrettyPrint.swift; sourceTree = "<group>"; };
 		B383E6291EF844E1004E71A6 /* TDKTweetTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweetTableCell.swift; sourceTree = "<group>"; };
 		B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTwitter.swift; sourceTree = "<group>"; };
 		B383E6321EF844ED004E71A6 /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
@@ -147,6 +147,7 @@
 		B383E5FC1EF7A832004E71A6 /* TwitterDevKit */ = {
 			isa = PBXGroup;
 			children = (
+				B37A7A0A1F53C8C800068F43 /* TDKTweetLabel.swift */,
 				B347D4BF1F2873EC00B14C9E /* TDKUser.swift */,
 				B347D4B71F2873E500B14C9E /* TDKDate.swift */,
 				B347D4B81F2873E500B14C9E /* TDKEntities.swift */,
@@ -157,7 +158,6 @@
 				B343E0241EF96D3F00D674BD /* TDKClickableAction.swift */,
 				B383E6251EF844E1004E71A6 /* TDKImageCacheLoader.swift */,
 				B383E6261EF844E1004E71A6 /* TDKJSON.swift */,
-				B383E6281EF844E1004E71A6 /* TDKPrettyPrint.swift */,
 				B383E6291EF844E1004E71A6 /* TDKTweetTableCell.swift */,
 				B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */,
 				B383E5FD1EF7A832004E71A6 /* TwitterDevKit.h */,
@@ -336,10 +336,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B37A7A0B1F53C8C800068F43 /* TDKTweetLabel.swift in Sources */,
 				B30C463E1EFB947B00F61030 /* TDKTimeline.swift in Sources */,
 				B347D4C01F2873EC00B14C9E /* TDKUser.swift in Sources */,
 				B30C463D1EFB947B00F61030 /* TDKParameters.swift in Sources */,
-				B383E62F1EF844E1004E71A6 /* TDKPrettyPrint.swift in Sources */,
 				B347D4BE1F2873E500B14C9E /* TDKTweet.swift in Sources */,
 				B347D4BD1F2873E500B14C9E /* TDKPlaces.swift in Sources */,
 				B383E62D1EF844E1004E71A6 /* TDKJSON.swift in Sources */,

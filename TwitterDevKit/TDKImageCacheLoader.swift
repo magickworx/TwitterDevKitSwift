@@ -3,7 +3,7 @@
  * FILE:	TDKImageCacheLoader.swift
  * DESCRIPTION:	TwitterDevKit: Asynchoronous Image Downloader with Cache
  * DATE:	Sun, Jun 18 2017
- * UPDATED:	Thu, Jun 29 2017
+ * UPDATED:	Sun, Aug 27 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -52,36 +52,13 @@ public final class TDKImageCacheLoader
   let cache = NSCache<NSString, UIImage>()
   let session = URLSession.shared
 
-  private init() {
-  }
-
-  public func fetchImage(with urlString: String, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
+  public func fetchImage(with urlString: String, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
     if let image = cache.object(forKey: urlString as NSString) {
       DispatchQueue.main.async {
         completion(image, nil)
       }
     }
-    else {
-      if let url = URL(string: urlString) {
-        session.dataTask(with: url, completionHandler: {
-          (data, response, error) in
-          guard error == nil, let image = UIImage(data: data!) else {
-            DispatchQueue.main.async {
-              completion(nil, error)
-            }
-            return
-          }
-          self.cache.setObject(image, forKey: urlString as NSString)
-          DispatchQueue.main.async {
-            completion(image, nil)
-          }
-        }).resume()
-      }
-    }
-  }
-
-  public func fetchPhoto(with urlString: String, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
-    if let url = URL(string: urlString) {
+    else if let url = URL(string: urlString) {
       let req = URLRequest(url: url,
                            cachePolicy: .returnCacheDataElseLoad,
                            timeoutInterval: cachedTime)

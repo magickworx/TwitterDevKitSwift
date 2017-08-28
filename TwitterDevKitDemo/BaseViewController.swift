@@ -3,7 +3,7 @@
  * FILE:	BaseViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Application Base View Controller
  * DATE:	Fri, Jun  2 2017
- * UPDATED:	Thu, Jun 29 2017
+ * UPDATED:	Sun, Aug 27 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,6 +42,8 @@
 
 import Foundation
 import UIKit
+import AVKit
+import AVFoundation
 import Social
 import SafariServices
 import TwitterDevKit
@@ -150,7 +152,7 @@ extension BaseViewController
             urlString += ":small"
           }
         }
-        TDKImageCacheLoader.shared.fetchPhoto(with: urlString, cachedTime: 180, completion: {
+        TDKImageCacheLoader.shared.fetchImage(with: urlString, cachedTime: 180, completion: {
           [weak self] (fetchedImage: UIImage?, error: Error?) in
           if let weakSelf = self {
             if let image = fetchedImage {
@@ -163,6 +165,61 @@ extension BaseViewController
         })
       }
     }
+  }
+}
+
+extension BaseViewController
+{
+  func playback(with urlStr: String) {
+    autoreleasepool {
+      if let url = URL(string: urlStr) {
+        let videoPlayer = AVPlayer(url: url)
+        let playerController = AVPlayerViewController()
+        playerController.player = videoPlayer
+        self.present(playerController, animated: true, completion: {
+          [unowned self] in
+          self.addPlaybackNotification(for: videoPlayer)
+          videoPlayer.play()
+        })
+      }
+    }
+  }
+
+  func playbackVideo(_ media: TDKMedia) {
+    guard let videoInfo = media.videoInfo else { return }
+    for variant in videoInfo.variants {
+      if let contentType = variant.contentType, let urlStr = variant.url,
+         variant.bitrate == 0 { // XXX: bitrate == 0 is streaming.
+        if contentType == "application/x-mpegURL" ||
+           contentType == "video/mp4" {
+          playback(with: urlStr)
+        }
+      }
+    }
+  }
+
+  func addPlaybackNotification(for player: AVPlayer) {
+    let center = NotificationCenter.default
+    center.addObserver(self,
+                       selector: #selector(playerDidFinishPlaying),
+                       name: .AVPlayerItemDidPlayToEndTime,
+                       object: player.currentItem)
+  }
+
+  func removePlaybackNotification() {
+    let center = NotificationCenter.default
+    center.removeObserver(self,
+                          name: .AVPlayerItemDidPlayToEndTime,
+                          object: nil)
+  }
+
+  func playerDidFinishPlaying(_ notification: Notification) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1500), execute: {
+      [unowned self] in
+      self.dismiss(animated: true, completion: {
+        self.removePlaybackNotification()
+      })
+    })
   }
 }
 
