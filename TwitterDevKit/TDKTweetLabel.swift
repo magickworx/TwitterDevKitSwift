@@ -3,7 +3,7 @@
  * FILE:	TDKTweetLabel.swift
  * DESCRIPTION:	TwitterDevKit: Tweet Label with Clickable Action
  * DATE:	Wed, Aug 23 2017
- * UPDATED:	Sun, Aug 27 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -210,7 +210,7 @@ public class TDKTweetLabel: UILabel
     layoutManager.addTextContainer(textContainer)
     textStorage.addLayoutManager(layoutManager)
 
-    isUserInteractionEnabled = true
+    prepareCopyable()
   }
 }
 
@@ -592,6 +592,49 @@ extension TDKTweetLabel
     let attributes = attributedText.attributes(at: 0, effectiveRange: &range)
     let constraintSize = CGSize(width: width, height: height)
     return attributedText.string.boundingRect(with: constraintSize, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
+  }
+}
+
+/*
+ * ios - Selectable UILabel contents - Stack Overflow
+ * https://stackoverflow.com/questions/15188911/selectable-uilabel-contents
+ */
+extension TDKTweetLabel
+{
+  func prepareCopyable() {
+    isUserInteractionEnabled = true
+
+    let holdGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+    addGestureRecognizer(holdGesture)
+  }
+
+  func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+    if gesture.state == .began {
+      becomeFirstResponder()
+      let menu = UIMenuController.shared
+      if !menu.isMenuVisible {
+        menu.setTargetRect(bounds, in: self)
+        menu.setMenuVisible(true, animated: true)
+      }
+    }
+  }
+
+  override public var canBecomeFirstResponder: Bool {
+    return true
+  }
+
+  override public func copy(_ sender: Any?) {
+    let menu = UIMenuController.shared
+    let labelText = self.text ?? self.attributedText?.string
+    if let copyedText = labelText {
+      let clipboard = UIPasteboard.general
+      clipboard.string = copyedText
+    }
+    menu.setMenuVisible(false, animated: true)
+  }
+
+  override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    return action == #selector(UIResponderStandardEditActions.copy)
   }
 }
 

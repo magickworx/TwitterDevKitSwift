@@ -3,7 +3,7 @@
  * FILE:	TDKTweet.swift
  * DESCRIPTION:	TwitterDevKit: Primitive Tweet Class for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Jul 26 2017
+ * UPDATED:	Wed, Sep  6 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -43,7 +43,7 @@
 import Foundation
 
 // https://dev.twitter.com/overview/api/tweets
-public class TDKTweet {
+open class TDKTweet {
   public internal(set) var id: Int64 = 0
   public internal(set) var idStr: String? = nil
   public internal(set) var createdAt: TDKDate? = nil

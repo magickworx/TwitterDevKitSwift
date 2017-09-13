@@ -3,7 +3,7 @@
  * FILE:	TDKImageCacheLoader.swift
  * DESCRIPTION:	TwitterDevKit: Asynchoronous Image Downloader with Cache
  * DATE:	Sun, Jun 18 2017
- * UPDATED:	Sun, Aug 27 2017
+ * UPDATED:	Fri, Sep  1 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -52,7 +52,14 @@ public final class TDKImageCacheLoader
   let cache = NSCache<NSString, UIImage>()
   let session = URLSession.shared
 
-  public func fetchImage(with urlString: String, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
+  public func fetchImage(with urlString: String, resized size: CGSize = .zero, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
+    let finished = { [unowned self] (_ image: UIImage, _ key: String) in
+      self.cache.setObject(image, forKey: key as NSString)
+      DispatchQueue.main.async {
+        completion(image, nil)
+      }
+    }
+
     if let image = cache.object(forKey: urlString as NSString) {
       DispatchQueue.main.async {
         completion(image, nil)
@@ -72,11 +79,47 @@ public final class TDKImageCacheLoader
           }
           return
         }
-        self.cache.setObject(image, forKey: urlString as NSString)
-        DispatchQueue.main.async {
-          completion(image, nil)
+        if size.width > 0 && size.height > 0 {
+          if let resizedImage = image.resize(to: size) {
+            let key = String(format: "%@+%.0fx%.0f", urlString, size.width, size.height)
+            finished(resizedImage, key)
+          }
+          else {
+            finished(image, urlString)
+          }
+        }
+        else {
+          finished(image, urlString)
+          /*
+          self.cache.setObject(image, forKey: urlString as NSString)
+          DispatchQueue.main.async {
+            completion(image, nil)
+          }
+          */
         }
       }).resume()
     }
+  }
+}
+
+fileprivate extension UIImage
+{
+  func resize(to newSize: CGSize) -> UIImage? {
+    let  widthRatio = newSize.width  / size.width
+    let heightRatio = newSize.height / size.height
+    let resizeRatio = widthRatio < heightRatio ? widthRatio : heightRatio
+    let resizedSize = CGSize(width: size.width * resizeRatio, height: size.height * resizeRatio)
+    let opaque: Bool = false
+    let  scale: CGFloat = 0.0
+
+    UIGraphicsBeginImageContextWithOptions(resizedSize, opaque, scale)
+    if let context = UIGraphicsGetCurrentContext() {
+      context.interpolationQuality = .high
+    }
+    draw(in: CGRect(origin: .zero, size: resizedSize))
+    let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+
+    return resizedImage
   }
 }

@@ -3,7 +3,7 @@
  * FILE:	TDKUser.swift
  * DESCRIPTION:	TwitterDevKit: User Structure for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Jul 26 2017
+ * UPDATED:	Sat, Sep  9 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -43,7 +43,8 @@
 import Foundation
 
 // https://dev.twitter.com/overview/api/users
-public struct TDKUser {
+public class TDKUser
+{
   public internal(set) var id: Int64 = 0
   public internal(set) var idStr: String? = nil
   public internal(set) var createdAt: TDKDate? = nil
@@ -220,7 +221,8 @@ public struct TDKUser {
   }
 }
 
-public struct TDKUserEntities {
+public struct TDKUserEntities
+{
   public internal(set) var url: [String:Any] = [:]
   public internal(set) var description: [String:Any] = [:]
 
@@ -241,5 +243,31 @@ public struct TDKUserEntities {
       contents.append(TDKURL(entity))
     }
     return contents
+  }
+}
+
+public enum ProfileImageSize
+{
+  case original
+  case normal // 48x48 [px]
+  case bigger // 73x73 [px]
+  case mini   // 24x24 [px]
+  case custom // 400x400 [px] (undocumented)
+
+  public func convert(from urlString: String) -> String {
+    var suffix: String = ""
+    switch self {
+      case .normal:
+        suffix = "_normal"
+      case .bigger:
+        suffix = "_bigger"
+      case .mini:
+        suffix = "_mini"
+      case .original:
+        break
+      case .custom:
+        suffix = "_400x400"
+    }
+    return urlString.replacingOccurrences(of: "_normal", with: suffix)
   }
 }

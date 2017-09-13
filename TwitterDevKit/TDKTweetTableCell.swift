@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Sun, Aug 27 2017
+ * UPDATED:	Sun, Sep 10 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -43,9 +43,11 @@
 import Foundation
 import UIKit
 
-public class TDKTweetTableCell: UITableViewCell
+open class TDKTweetTableCell: UITableViewCell
 {
-  public weak var delegate: TDKClickableActionDelegate? = nil
+  open weak var delegate: TDKClickableActionDelegate? = nil
+
+  let profileImageSize: CGFloat = 48.0
 
   let iconView: UIButton = UIButton(type: .custom)
   let nameLabel: UILabel = UILabel()
@@ -66,12 +68,9 @@ public class TDKTweetTableCell: UITableViewCell
   let playbackButton: UIButton = UIButton()
   let playbackLabel: UILabel = UILabel()
 
-  var clickableTweetMap: [String:[String:(NSRange,Any)]]? = nil
-  var clickableQuoteMap: [String:[String:(NSRange,Any)]]? = nil
-
   var mediaArray: [TDKMedia] = [] // 添付画像管理用
 
-  public var tweet: TDKTweet? = nil {
+  open var tweet: TDKTweet? = nil {
     didSet {
       self.composeTweet()
     }
@@ -81,7 +80,7 @@ public class TDKTweetTableCell: UITableViewCell
     fatalError("init(coder:) has not been implemented")
   }
 
-  override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+  public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
 
     self.selectionStyle = .none
@@ -186,11 +185,11 @@ public class TDKTweetTableCell: UITableViewCell
     prepareTapHandlers()
   }
 
-  public override func draw(_ rect: CGRect) {
+  open override func draw(_ rect: CGRect) {
     super.draw(rect)
   }
 
-  public override func layoutSubviews() {
+  open override func layoutSubviews() {
     super.layoutSubviews()
     // 以下に必要なコードを記述する
   }
@@ -198,7 +197,7 @@ public class TDKTweetTableCell: UITableViewCell
   func calculatesLayoutSubviews() -> CGSize {
     let  lineHeight: CGFloat = 24.0
     let   lineSpace: CGFloat = 4.0
-    let    iconSize: CGFloat = 48.0
+    let    iconSize: CGFloat = profileImageSize
     let      margin: CGFloat = 8.0
     let   maxHeight: CGFloat = CGFloat(CGFloat.greatestFiniteMagnitude)
 
@@ -235,10 +234,6 @@ public class TDKTweetTableCell: UITableViewCell
       if text.characters.count > 0 {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = quotedTweet.lineBreakMode
-        let attributes: [String:Any] = [
-          NSFontAttributeName : quotedTweet.font,
-          NSParagraphStyleAttributeName : paragraphStyle
-        ]
         let qw: CGFloat = w - m * 2.0
         let size = quotedTweet.suitableContentSize(width: qw, height: maxHeight)
         let qh: CGFloat = ceil(size.height + m * 2.0)
@@ -328,7 +323,7 @@ public class TDKTweetTableCell: UITableViewCell
     return CGSize(width: width, height: height)
   }
 
-  public override func prepareForReuse() {
+  open override func prepareForReuse() {
     iconView.setImage(nil, for: .normal)
     nameLabel.text = nil
     screenLabel.text = nil
@@ -353,7 +348,7 @@ public class TDKTweetTableCell: UITableViewCell
     super.prepareForReuse()
   }
 
-  public override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
+  open override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
     return self.calculatesLayoutSubviews()
   }
 }
@@ -404,27 +399,44 @@ extension TDKTweetTableCell
       nameLabel.text = name
     }
 
-    if let screen = status.user?.screenName {
-      screenLabel.text = "@" + screen
+    if let user = status.user, let screen = user.screenName {
+      if user.verified {
+        let text = NSMutableAttributedString(string: "@" + screen)
+        let prettyColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
+        let attrs: [String:Any] = [
+          NSForegroundColorAttributeName: prettyColor,
+          NSFontAttributeName: screenLabel.font
+        ]
+        let checkmark: String = "\u{2714}\u{fe0e}"
+        let verified = NSAttributedString(string: checkmark, attributes: attrs)
+        text.append(verified)
+        screenLabel.attributedText = text
+      }
+      else {
+        screenLabel.text = "@" + screen
+      }
     }
 
+    let imageSize: ProfileImageSize = .custom
     if let url = status.user?.profileImageUrlHttps {
-      fetchUserIcon(with: url)
+      fetchUserIcon(with: imageSize.convert(from: url))
     }
     else if let url = status.user?.profileImageUrl {
-      fetchUserIcon(with: url)
+      fetchUserIcon(with: imageSize.convert(from: url))
     }
 
     if let media = getMedia(of: status) {
       self.fetchMedia(media)
     }
 
+#if     false
     if let coordinates = status.coordinates, coordinates.type.lowercased() == "point" {
       dump(coordinates)
     }
     if let place = status.place {
       dump(place)
     }
+#endif
     if status.possiblySensitive {
       print("sensitive")
     }
@@ -520,7 +532,8 @@ extension TDKTweetTableCell: TDKTweetLabelDelegate
 extension TDKTweetTableCell
 {
   func fetchUserIcon(with urlString: String) {
-    TDKImageCacheLoader.shared.fetchImage(with: urlString, completion: {
+    let size = CGSize(width: profileImageSize, height: profileImageSize)
+    TDKImageCacheLoader.shared.fetchImage(with: urlString, resized: size, completion: {
       [weak self] (image: UIImage?, error: Error?) in
       guard error == nil else { return }
       if let weakSelf = self, let image = image {
@@ -595,16 +608,16 @@ extension TDKTweetTableCell
         [weak self] (data, response, error) in
         if error == nil {
           if let weakSelf = self, let imageData = data, let image = UIImage(data: imageData) {
-            DispatchQueue.main.async {
+            DispatchQueue.global(qos: .default).async {
               let w = image.size.width
               let h = image.size.height
               if quoted {
                 weakSelf.quotedMedia.contentMode = w < h ? .center : .scaleAspectFit
-                weakSelf.quotedMedia.image = image
+                weakSelf.quotedMedia.setImage(image, withAnimation: .curveLinear)
               }
               else {
                 weakSelf.mediaView.contentMode = w < h ? .center : .scaleAspectFit
-                weakSelf.mediaView.image = image
+                weakSelf.mediaView.setImage(image)
               }
               weakSelf.contentView.setNeedsDisplay()
             }
@@ -737,5 +750,26 @@ fileprivate extension String {
       }
     }
     return false
+  }
+}
+
+fileprivate extension UIImageView
+{
+  func setImage(_ image: UIImage, withAnimation options: UIViewAnimationOptions = .curveEaseInOut) {
+    DispatchQueue.main.async { [unowned self] in
+      self.alpha = 0.0
+      let animationsClosure = { [unowned self] () -> Void in
+        self.image = image
+        self.alpha = 0.9
+      }
+      let completionClosure = { [unowned self] (finished: Bool) -> Void in
+        self.alpha = 1.0
+      }
+      UIView.animate(withDuration: 1.0,
+                     delay: 0.4,
+                     options: options,
+                     animations: animationsClosure,
+                     completion: completionClosure)
+    }
   }
 }
