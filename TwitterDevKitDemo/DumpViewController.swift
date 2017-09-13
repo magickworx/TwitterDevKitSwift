@@ -3,7 +3,7 @@
  * FILE:	DumpViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Print String from dump()
  * DATE:	Fri, Jun 23 2017
- * UPDATED:	Fri, Jun 23 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -51,6 +51,7 @@ class DumpViewController: BaseViewController
   public convenience init(with text: String) {
     self.init()
 
+    self.title = "JSON Entity"
     self.text = text
   }
 
@@ -78,7 +79,10 @@ class DumpViewController: BaseViewController
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    self.navigationItem.rightBarButtonItem = nil
+    let actionItem = UIBarButtonItem(barButtonSystemItem: .action,
+                                     target: self,
+                                     action: #selector(handleAction))
+    self.navigationItem.rightBarButtonItem = actionItem
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -88,6 +92,19 @@ class DumpViewController: BaseViewController
 
     if let text = self.text {
       self.textView.text = text
+    }
+  }
+}
+
+extension DumpViewController
+{
+  func handleAction(_ sender: UIBarButtonItem) {
+    autoreleasepool {
+      if let text = self.text {
+        let items = [text]
+        let viewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        self.present(viewController, animated: true, completion: nil)
+      }
     }
   }
 }
