@@ -3,7 +3,7 @@
  * FILE:	SearchViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Search Tweet
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Sun, Aug 27 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -227,6 +227,24 @@ extension SearchViewController: TimelineViewDelegate
         let viewController = DumpViewController(with: text)
         self.navigationController?.pushViewController(viewController, animated: true)
       }
+    }
+  }
+}
+
+extension SearchViewController: TweetTableCellDelegate
+{
+  func tweetAction(_ action: TweetAction, for tweet: TDKTweet, finished: @escaping TweetActionFinishHandler) {
+    switch action {
+      case .json:
+        autoreleasepool {
+          if let text = tweet.prettyPrintedJSONData() {
+            let viewController = DumpViewController(with: text)
+            self.navigationController?.pushViewController(viewController, animated: true)
+          }
+        }
+      default: // XXX: 実際の実装では action 毎のコードを記述する
+        finished(true)
+        break
     }
   }
 }

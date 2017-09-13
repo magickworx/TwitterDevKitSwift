@@ -3,7 +3,7 @@
  * FILE:	TimelineView.swift
  * DESCRIPTION:	TwitterDevKitDemo: Generic Timeline View Class
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Jun 28 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -71,10 +71,10 @@ class TimelineView: UIView
     tableView.backgroundColor = .white
     tableView.rowHeight = UITableViewAutomaticDimension
     tableView.estimatedRowHeight = 388
-    tableView.allowsSelection = true
+    tableView.allowsSelection = false
     tableView.separatorInset = UIEdgeInsets.zero
     tableView.layoutMargins = UIEdgeInsets.zero
-    tableView.register(TDKTweetTableCell.self, forCellReuseIdentifier: kTableCellIdentifier)
+    tableView.register(TweetTableCell.self, forCellReuseIdentifier: kTableCellIdentifier)
     self.addSubview(tableView)
 
     let refreshControl: UIRefreshControl = UIRefreshControl()
@@ -140,7 +140,7 @@ extension TimelineView: UITableViewDataSource
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let row = indexPath.row
     let tweet = self.tableData[row] as! TDKTweet
-    let cell: TDKTweetTableCell = tableView.dequeueReusableCell(withIdentifier: kTableCellIdentifier, for: indexPath) as! TDKTweetTableCell
+    let cell: TweetTableCell = tableView.dequeueReusableCell(withIdentifier: kTableCellIdentifier, for: indexPath) as! TweetTableCell
     cell.tweet = tweet
     if let delegate = self.delegate {
       cell.delegate = delegate
@@ -171,5 +171,20 @@ extension TimelineView: UITableViewDelegate
     if let tweet = self.tableData[row] as? TDKTweet {
       delegate?.timelineView(self, didSelect: tweet)
     }
+  }
+}
+
+extension TimelineView: UIScrollViewDelegate
+{
+  /*
+   * ios - Bug with scrollsToTop and UIRefreshControl - Stack Overflow
+   * https://stackoverflow.com/questions/27030826/bug-with-scrollstotop-and-uirefreshcontrol
+   */
+  func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+    if let refreshControl = tableView.refreshControl {
+      refreshControl.beginRefreshing()
+      refreshControl.endRefreshing()
+    }
+    return tableView.scrollsToTop
   }
 }
