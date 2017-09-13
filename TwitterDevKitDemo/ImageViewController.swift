@@ -3,7 +3,7 @@
  * FILE:	ImageViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Present UIImage
  * DATE:	Fri, Jun 23 2017
- * UPDATED:	Wed, Jun 28 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -50,10 +50,14 @@ class ImageViewController: UIViewController
 
   var image: UIImage? = nil
 
+  var isSizeFit: Bool = false
+
   public convenience init(with image: UIImage) {
     self.init()
 
     self.image = image
+
+    self.title = String(format: "%.0fx%.0f", image.size.width, image.size.height)
   }
 
   override func didReceiveMemoryWarning() {
@@ -97,6 +101,11 @@ class ImageViewController: UIViewController
     closeItem.tintColor = .lightGray
     self.navigationItem.leftBarButtonItem = closeItem
 
+    let actionItem = UIBarButtonItem(barButtonSystemItem: .action,
+                                     target: self,
+                                     action: #selector(handleAction))
+    self.navigationItem.rightBarButtonItem = actionItem
+
     self.addGestures()
   }
 
@@ -107,6 +116,8 @@ class ImageViewController: UIViewController
     self.navigationController?.navigationBar.shadowImage = UIImage()
     self.navigationController?.navigationBar.isTranslucent = true
     self.navigationController?.view.backgroundColor = .clear
+
+    UIApplication.shared.isStatusBarHidden = true
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -119,65 +130,151 @@ class ImageViewController: UIViewController
     super.viewWillDisappear(animated)
 
     self.navigationController?.navigationBar.isHidden = false
+
+    UIApplication.shared.isStatusBarHidden = false
   }
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
 
-    if let size = self.image?.size {
-      let  scrollWidth: CGFloat = scrollView.frame.size.width
-      let scrollHeight: CGFloat = scrollView.frame.size.height
-      let   imageWidth: CGFloat = size.width
-      let  imageHeight: CGFloat = size.height
-      let  widthFactor: CGFloat =  scrollWidth / imageWidth
-      let heightFactor: CGFloat = scrollHeight / imageHeight
-      let  scaleFactor: CGFloat = min(widthFactor, heightFactor, 1.0)
-      let  scaledWidth: CGFloat = floor( imageWidth * scaleFactor)
-      let scaledHeight: CGFloat = floor(imageHeight * scaleFactor)
-
-      let imageSize = CGSize(width: scaledWidth, height: scaledHeight)
-      imageView.frame.size = imageSize
-      scrollView.contentSize = imageSize
-
-      updateScrollInset()
-    }
-  }
-
-  // http://qiita.com/wmoai/items/52b1901e62d28dae9f91
-  func updateScrollInset() {
-    var offset: CGFloat = 0.0
-
-    if let navigationController = self.navigationController {
-      if !navigationController.navigationBar.isHidden {
-        offset = navigationController.navigationBar.frame.size.height
-      }
-      else {
-        offset = 0.0
-      }
-    }
-
-    // imageView の大きさから contentInset を再計算
-    // なお、0を下回らないようにする
-    let  width = scrollView.frame.width  - imageView.frame.width
-    let height = scrollView.frame.height - imageView.frame.height
-    scrollView.contentInset = UIEdgeInsets(
-         top: max((height * 0.5), offset),
-        left: max((width * 0.5), 0.0),
-      bottom: 0.0,
-       right: 0.0
-    )
+    imageSizeToFit(true, animated: false)
   }
 }
 
+// MARK: - Handle UIBarButtonItem Action on UINavigationBar
 extension ImageViewController
 {
   func closeAction(sender: UIBarButtonItem) {
     self.dismiss(animated: true, completion: nil)
   }
 
+  func handleAction(_ sender: UIBarButtonItem) {
+    autoreleasepool {
+      if let image = self.image {
+        let items = [image]
+        let viewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        present(viewController, animated: true, completion: nil)
+      }
+    }
+  }
+}
+
+extension ImageViewController
+{
+  func imageSizeToFit(_ fit: Bool, animated: Bool = true) {
+    if let imageSize = image?.size {
+      let  imageWidth: CGFloat = imageSize.width
+      let imageHeight: CGFloat = imageSize.height
+      let    viewSize: CGSize  = self.view.bounds.size
+      let   viewWidth: CGFloat = viewSize.width
+      let  viewHeight: CGFloat = viewSize.height
+      var centerPoint: CGPoint = .zero
+      var  scaledSize: CGSize  = imageSize
+
+      if fit {
+        let  widthFactor: CGFloat =  viewWidth / imageWidth
+        let heightFactor: CGFloat = viewHeight / imageHeight
+        let  scaleFactor: CGFloat = min(widthFactor, heightFactor, 1.0)
+        let  scaledWidth: CGFloat = floor( imageWidth * scaleFactor)
+        let scaledHeight: CGFloat = floor(imageHeight * scaleFactor)
+
+        scaledSize = CGSize(width: scaledWidth, height: scaledHeight)
+
+        if (widthFactor < heightFactor) {
+          centerPoint.y = floor((viewHeight - scaledHeight) * 0.5)
+        }
+        else if (widthFactor > heightFactor) {
+          centerPoint.x = floor((viewWidth - scaledWidth) * 0.5)
+        }
+        scrollView.contentSize = CGSize(width: viewWidth, height: viewHeight)
+      }
+      else {
+        if (imageWidth < viewWidth) {
+          centerPoint.x = floor((viewWidth - imageWidth) * 0.5)
+        }
+        if (imageHeight < viewHeight) {
+          centerPoint.y = floor((viewHeight - imageHeight) * 0.5)
+        }
+        scrollView.contentSize = CGSize(width: imageWidth, height: imageHeight)
+      }
+
+      imageView.frame = CGRect(origin: centerPoint, size: scaledSize)
+      if animated {
+        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale")
+        scaleAnimation.fromValue = 0.1
+        scaleAnimation.toValue = 1.0
+        scaleAnimation.duration = 0.8
+        scaleAnimation.autoreverses = false
+        scaleAnimation.isRemovedOnCompletion = true
+        scaleAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+        imageView.layer.add(scaleAnimation, forKey: "scaleAnimation")
+      }
+
+      isSizeFit = fit
+    }
+  }
+
+  func zoomRect(for scale: CGFloat, with center: CGPoint) -> CGRect {
+    var zoomRect: CGRect = .zero
+
+    /*
+     * The zoom rect is in the content view's coordinates.
+     * At a zoom scale of 1.0, it would be the size of the scrollView's bounds.
+     * As the zoom scale decreases, so more content is visible, the size fo
+     * the rect grows.
+     */
+    let scrollViewSize = scrollView.frame.size
+    zoomRect.size.width  = floor(scrollViewSize.width  / scale)
+    zoomRect.size.height = floor(scrollViewSize.height / scale)
+
+    // choose an origin so as to get the right center.
+    zoomRect.origin.x = center.x - (zoomRect.size.width  * 0.5)
+    zoomRect.origin.y = center.y - (zoomRect.size.height * 0.5)
+
+    return zoomRect
+  }
+}
+
+extension ImageViewController: UIScrollViewDelegate
+{
+  // return a view that will be scaled. if delegate returns nil, nothing happens
+  func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+    return imageView
+  }
+
+  // any zoom scale changes
+  func scrollViewDidZoom(_ scrollView: UIScrollView) {
+    let   boundsWidth = scrollView.bounds.size.width
+    let  boundsHeight = scrollView.bounds.size.height
+    let  contentWidth = scrollView.contentSize.width
+    let contentHeight = scrollView.contentSize.height
+
+    let offsetX: CGFloat = boundsWidth > contentWidth
+                         ? floor((boundsWidth - contentWidth) * 0.5)
+                         : 0.0
+    let offsetY: CGFloat = boundsHeight > contentHeight
+                         ? floor((boundsHeight - contentHeight) * 0.5)
+                         : 0.0
+    var centerPoint: CGPoint = .zero
+
+    centerPoint.x =  contentWidth * 0.5 + offsetX
+    centerPoint.y = contentHeight * 0.5 + offsetY
+    imageView.center = centerPoint
+  }
+}
+
+extension ImageViewController
+{
   func addGestures() {
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
-    imageView.addGestureRecognizer(tapGesture)
+    let singleTap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+    singleTap.numberOfTapsRequired = 1
+    imageView.addGestureRecognizer(singleTap)
+
+    let doubleTap = UITapGestureRecognizer(target: self, action: #selector(doubleTapHandler))
+    doubleTap.numberOfTapsRequired = 2
+    imageView.addGestureRecognizer(doubleTap)
+
+    singleTap.require(toFail: doubleTap)
 
     let holdGesture = UILongPressGestureRecognizer(target: self, action: #selector(holdHandler))
     holdGesture.minimumPressDuration = 1.8 // seconds
@@ -187,6 +284,28 @@ extension ImageViewController
   func tapHandler(gesture: UITapGestureRecognizer) {
     if let isHidden = self.navigationController?.navigationBar.isHidden {
       self.navigationController?.setNavigationBarHidden(!isHidden, animated: true)
+    }
+  }
+
+  func doubleTapHandler(gesture: UITapGestureRecognizer) {
+    if let imageSize = image?.size {
+      let  imageWidth: CGFloat = imageSize.width
+      let imageHeight: CGFloat = imageSize.height
+      let    viewSize: CGSize  = self.view.bounds.size
+      let   viewWidth: CGFloat = viewSize.width
+      let  viewHeight: CGFloat = viewSize.height
+      var scaleFactor: CGFloat = 1.0
+
+      if isSizeFit {
+        let  widthFactor: CGFloat =  imageWidth / viewWidth
+        let heightFactor: CGFloat = imageHeight / viewHeight
+        scaleFactor = max(widthFactor, heightFactor, 1.0)
+      }
+      isSizeFit = !isSizeFit
+
+      let point = gesture.location(in: gesture.view)
+      let rect = zoomRect(for: scaleFactor, with: point)
+      scrollView.zoom(to: rect, animated: true)
     }
   }
 
@@ -218,18 +337,5 @@ extension ImageViewController
         }
       }
     }
-  }
-}
-
-extension ImageViewController: UIScrollViewDelegate
-{
-  func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-    // ズームのために要指定
-    return imageView
-  }
-
-  func scrollViewDidZoom(_ scrollView: UIScrollView) {
-    // ズームのタイミングでcontentInsetを更新
-    updateScrollInset()
   }
 }
