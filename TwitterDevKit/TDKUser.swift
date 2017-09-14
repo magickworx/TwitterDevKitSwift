@@ -3,7 +3,7 @@
  * FILE:	TDKUser.swift
  * DESCRIPTION:	TwitterDevKit: User Structure for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Sat, Sep  9 2017
+ * UPDATED:	Thu, Sep 14 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -218,6 +218,27 @@ public class TDKUser
     if let sval = json["withheld_scope"].string {
       self.withheldScope = sval
     }
+  }
+
+  static let profileImageSize: CGFloat = 48.0
+}
+
+// MARK: - Convenience Methods for Clients
+extension TDKUser
+{
+  public func fetchProfileImage(with size: CGSize = CGSize(width: TDKUser.profileImageSize, height: TDKUser.profileImageSize), completion: @escaping TDKImageCacheLoaderCompletionHandler) {
+    let imageSize: ProfileImageSize = .custom
+    var urlString: String = ""
+    if let url = self.profileImageUrlHttps {
+      urlString = imageSize.convert(from: url)
+    }
+    else if let url = self.profileImageUrl {
+      urlString = imageSize.convert(from: url)
+    }
+    else {
+      completion(nil, nil)
+    }
+    TDKImageCacheLoader.shared.fetchImage(with: urlString, resized: size, completion: completion)
   }
 }
 

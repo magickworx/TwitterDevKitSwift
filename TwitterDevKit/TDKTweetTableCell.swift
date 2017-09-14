@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Sun, Sep 10 2017
+ * UPDATED:	Thu, Sep 14 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -47,7 +47,7 @@ open class TDKTweetTableCell: UITableViewCell
 {
   open weak var delegate: TDKClickableActionDelegate? = nil
 
-  let profileImageSize: CGFloat = 48.0
+  let profileImageSize: CGFloat = TDKUser.profileImageSize
 
   let iconView: UIButton = UIButton(type: .custom)
   let nameLabel: UILabel = UILabel()
@@ -417,12 +417,8 @@ extension TDKTweetTableCell
       }
     }
 
-    let imageSize: ProfileImageSize = .custom
-    if let url = status.user?.profileImageUrlHttps {
-      fetchUserIcon(with: imageSize.convert(from: url))
-    }
-    else if let url = status.user?.profileImageUrl {
-      fetchUserIcon(with: imageSize.convert(from: url))
+    if let user = status.user {
+      fetchIcon(of: user)
     }
 
     if let media = getMedia(of: status) {
@@ -531,20 +527,21 @@ extension TDKTweetTableCell: TDKTweetLabelDelegate
 // MARK: - Downloader
 extension TDKTweetTableCell
 {
-  func fetchUserIcon(with urlString: String) {
-    let size = CGSize(width: profileImageSize, height: profileImageSize)
-    TDKImageCacheLoader.shared.fetchImage(with: urlString, resized: size, completion: {
-      [weak self] (image: UIImage?, error: Error?) in
+  func fetchIcon(of user: TDKUser) {
+    user.fetchProfileImage(completion: {
+      (image: UIImage?, error: Error?) in
       guard error == nil else { return }
-      if let weakSelf = self, let image = image {
-        weakSelf.iconView.setImage(image, for: .normal)
-        weakSelf.iconView.backgroundColor = .clear
-        let bounds = weakSelf.iconView.bounds
-        let radius = bounds.width * 0.5
-        let maskPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
-        let maskLayer = CAShapeLayer()
-        maskLayer.path = maskPath.cgPath
-        weakSelf.iconView.layer.mask = maskLayer;
+      if let image = image {
+        DispatchQueue.main.async { [unowned self] in
+          self.iconView.setImage(image, for: .normal)
+          self.iconView.backgroundColor = .clear
+          let bounds = self.iconView.bounds
+          let radius = bounds.width * 0.5
+          let maskPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
+          let maskLayer = CAShapeLayer()
+          maskLayer.path = maskPath.cgPath
+          self.iconView.layer.mask = maskLayer
+        }
       }
     })
   }
