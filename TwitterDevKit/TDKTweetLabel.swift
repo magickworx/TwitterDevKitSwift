@@ -3,7 +3,7 @@
  * FILE:	TDKTweetLabel.swift
  * DESCRIPTION:	TwitterDevKit: Tweet Label with Clickable Action
  * DATE:	Wed, Aug 23 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Thu, Sep 14 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -522,6 +522,7 @@ extension TDKTweetLabel
 
   public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
+    hideMenuController()
     if onTouch(touch) { return }
     super.touchesBegan(touches, with: event)
   }
@@ -619,6 +620,13 @@ extension TDKTweetLabel
     }
   }
 
+  func hideMenuController() {
+    let menu = UIMenuController.shared
+    if menu.isMenuVisible {
+      menu.setMenuVisible(false, animated: true)
+    }
+  }
+
   override public var canBecomeFirstResponder: Bool {
     return true
   }
@@ -660,7 +668,15 @@ extension TDKTweet
       text.enumerateSubstrings(in: range, options: .byComposedCharacterSequences) {
         (substring, _, _, _) -> () in
         if let substring = substring {
+          /*
+           * XXX: 2017/09/13 (Wed)
+           * first を利用すると mention 部分が省略される
+           * よって、first は 0 からの処理とする
           if count >= first && count < last {
+            chars.append(substring)
+          }
+          */
+          if count >= 0 && count < last {
             chars.append(substring)
           }
           count += 1

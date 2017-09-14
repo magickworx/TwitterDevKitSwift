@@ -3,7 +3,7 @@
  * FILE:	TDKPlaces.swift
  * DESCRIPTION:	TwitterDevKit: Places Structures for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Jul 26 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -45,6 +45,21 @@ import Foundation
 // https://dev.twitter.com/overview/api/tweets
 public struct TDKCoordinates {
   public internal(set) var coordinates: [Double] = [] // [longitude, latitude]
+  public internal(set) var type: String = "" // "Point",...
+
+  public init(_ json: JSON) {
+    if let type = json["type"].string {
+      self.type = type
+    }
+    if let coordinates = json["coordinates"].array as? [Double] {
+      self.coordinates = coordinates
+    }
+  }
+}
+
+// Deprecated field, but some clients use this field yet...
+public struct TDKGeo {
+  public internal(set) var coordinates: [Double] = [] // [latitude, longitude]
   public internal(set) var type: String = "" // "Point",...
 
   public init(_ json: JSON) {

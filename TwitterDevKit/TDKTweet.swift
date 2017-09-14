@@ -3,7 +3,7 @@
  * FILE:	TDKTweet.swift
  * DESCRIPTION:	TwitterDevKit: Primitive Tweet Class for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Sep  6 2017
+ * UPDATED:	Wed, Sep 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -60,6 +60,7 @@ open class TDKTweet {
   public internal(set) var extendedEntities: TDKEntities? = nil
   public internal(set) var displayTextRange: [Int]? = nil
 
+  public internal(set) var geo: TDKGeo? = nil
   public internal(set) var coordinates: TDKCoordinates? = nil
   public internal(set) var currentUserRetweet: [String:Any]? = nil
   public internal(set) var favoriteCount: Int = 0
@@ -106,6 +107,9 @@ open class TDKTweet {
       self.jsonData = jsonData
     }
 
+    if json["geo"].dictionary != nil {
+      self.geo = TDKGeo(json["geo"])
+    }
     if json["coordinates"].dictionary != nil {
       self.coordinates = TDKCoordinates(json["coordinates"])
     }
