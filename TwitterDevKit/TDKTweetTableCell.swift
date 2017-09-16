@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Thu, Sep 14 2017
+ * UPDATED:	Sat, Sep 16 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -532,15 +532,17 @@ extension TDKTweetTableCell
       (image: UIImage?, error: Error?) in
       guard error == nil else { return }
       if let image = image {
-        DispatchQueue.main.async { [unowned self] in
-          self.iconView.setImage(image, for: .normal)
-          self.iconView.backgroundColor = .clear
-          let bounds = self.iconView.bounds
-          let radius = bounds.width * 0.5
-          let maskPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
-          let maskLayer = CAShapeLayer()
-          maskLayer.path = maskPath.cgPath
-          self.iconView.layer.mask = maskLayer
+        DispatchQueue.main.async { [weak self] in
+          if let weakSelf = self {
+            weakSelf.iconView.setImage(image, for: .normal)
+            weakSelf.iconView.backgroundColor = .clear
+            let bounds = weakSelf.iconView.bounds
+            let radius = bounds.width * 0.5
+            let maskPath = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
+            let maskLayer = CAShapeLayer()
+            maskLayer.path = maskPath.cgPath
+            weakSelf.iconView.layer.mask = maskLayer
+          }
         }
       }
     })
@@ -753,20 +755,22 @@ fileprivate extension String {
 fileprivate extension UIImageView
 {
   func setImage(_ image: UIImage, withAnimation options: UIViewAnimationOptions = .curveEaseInOut) {
-    DispatchQueue.main.async { [unowned self] in
-      self.alpha = 0.0
-      let animationsClosure = { [unowned self] () -> Void in
-        self.image = image
-        self.alpha = 0.9
+    DispatchQueue.main.async { [weak self] in
+      if let weakSelf = self {
+        weakSelf.alpha = 0.0
+        let animationsClosure = { () -> Void in
+          weakSelf.image = image
+          weakSelf.alpha = 0.9
+        }
+        let completionClosure = { (finished: Bool) -> Void in
+          weakSelf.alpha = 1.0
+        }
+        UIView.animate(withDuration: 1.0,
+                       delay: 0.4,
+                       options: options,
+                       animations: animationsClosure,
+                       completion: completionClosure)
       }
-      let completionClosure = { [unowned self] (finished: Bool) -> Void in
-        self.alpha = 1.0
-      }
-      UIView.animate(withDuration: 1.0,
-                     delay: 0.4,
-                     options: options,
-                     animations: animationsClosure,
-                     completion: completionClosure)
     }
   }
 }
