@@ -3,7 +3,7 @@
  * FILE:	TDKParameters.swift
  * DESCRIPTION:	TwitterDevKit: REST API Parameters for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Sat, Aug 26 2017
+ * UPDATED:	Wed, Oct 18 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -144,6 +144,7 @@ public struct TDKSearchTweetParameters
 
   public init(with q: String, count: Int = kDefaultCount) {
     self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
+#if DISABLE_SOCIAL_ACCOUNT_KIT
     let filteredQuery = q + " -filter:retweets"
     if let encodedQuery = filteredQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
       self.query = encodedQuery
@@ -151,6 +152,9 @@ public struct TDKSearchTweetParameters
     else {
       self.query = filteredQuery
     }
+#else
+    self.query = q + " exclude:retweets"
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
   }
 
   public func toJSON() -> [String:Any] {

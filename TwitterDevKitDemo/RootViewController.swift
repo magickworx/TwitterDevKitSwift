@@ -3,7 +3,7 @@
  * FILE:	RootViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Twitter View Controller
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Mon, Jun 26 2017
+ * UPDATED:	Wed, Oct 18 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -44,12 +44,15 @@ import Foundation
 import UIKit
 import Accounts
 import TwitterDevKit
+#if !DISABLE_SOCIAL_ACCOUNT_KIT
+import SocialAccountKit
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 class RootViewController: BaseViewController
 {
   let imageView: UIImageView = UIImageView()
 
-  var twitterAccount: ACAccount? = nil
+  var twitterAccount: TDKAccount? = nil
   var twitter: TDKTwitter? = nil
 
   override func setup() {
@@ -102,7 +105,7 @@ class RootViewController: BaseViewController
 extension RootViewController
 {
   func signIn() {
-    acquireAccount(completion: { (accounts: [ACAccount]) -> Void in
+    acquireAccount(completion: { (accounts: [TDKAccount]) -> Void in
       DispatchQueue.main.async() { [weak self] () -> Void in
         if let weakSelf = self {
           weakSelf.chooseAccount(from: accounts)
@@ -111,7 +114,8 @@ extension RootViewController
     })
   }
 
-  func acquireAccount(completion: @escaping (_ accounts: [ACAccount]) -> Void) {
+  func acquireAccount(completion: @escaping (_ accounts: [TDKAccount]) -> Void) {
+#if DISABLE_SOCIAL_ACCOUNT_KIT
     let store = ACAccountStore()
     let accountType = store.accountType(withAccountTypeIdentifier: ACAccountTypeIdentifierTwitter)
 
@@ -129,16 +133,37 @@ extension RootViewController
         self.popup(title: "Failed", message: "Forbidden")
         return
       }
-      let accounts = store.accounts(with: accountType) as! [ACAccount]
+      let accounts = store.accounts(with: accountType) as! [TDKAccount]
       guard accounts.count != 0 else {
         self.popup(title: "Attention", message: "Set your twitter account with Settings.app!")
         return
       }
       completion(accounts)
     })
+#else
+    let store = SAKAccountStore.shared
+    let accountType = store.accountType(withAccountTypeIdentifier: .twitter)
+
+    store.requestAccessToAccounts(with: accountType, completion: {
+      [unowned self] (granted: Bool, error: Error?) -> Void in
+      guard granted, error == nil else { return }
+      if let accounts = store.accounts(with: accountType) {
+        if accounts.isEmpty {
+//          self.popup(title: "Attention", message: "Set your twitter account.")
+          DispatchQueue.main.async {
+            let viewController = SAKAccountViewController(accountType: accountType)
+            self.present(viewController, animated: true, completion: nil)
+          }
+        }
+        else {
+          completion(accounts)
+        }
+      }
+    })
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
   }
 
-  func chooseAccount(from accounts: [ACAccount]) {
+  func chooseAccount(from accounts: [TDKAccount]) {
     let alert = UIAlertController(title: "Twitter", message: "Choose an account", preferredStyle: .actionSheet)
 
     for account in accounts {
@@ -170,6 +195,16 @@ extension RootViewController
       }
       pvc.permittedArrowDirections = .down
     }
+#if !DISABLE_SOCIAL_ACCOUNT_KIT
+    alert.addAction(UIAlertAction(title: "Manage Account", style: .destructive, handler: {
+      [unowned self] (action) in
+      DispatchQueue.main.async {
+        let accountType = SAKAccountType(.twitter)
+        let viewController = SAKAccountViewController(accountType: accountType)
+        self.present(viewController, animated: true, completion: nil)
+      }
+    }))
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
     alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     present(alert, animated: true, completion: nil)
   }
@@ -314,7 +349,7 @@ public extension DispatchQueue
      - parameter token: A unique reverse DNS style name such as com.vectorform.<name> or a GUID
      - parameter block: Block to execute once
   */
-  public class func once(token: String, block: (Void) -> Void) {
+  public class func once(token: String, block: () -> Void) {
     objc_sync_enter(self)
     defer { objc_sync_exit(self) }
 

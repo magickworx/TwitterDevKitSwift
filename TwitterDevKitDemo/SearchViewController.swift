@@ -3,7 +3,7 @@
  * FILE:	SearchViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Search Tweet
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Wed, Oct 18 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -114,7 +114,10 @@ class SearchViewController: BaseViewController
 extension SearchViewController
 {
   func handleTimeline(_ timeline: TDKTimeline) {
-    progressBar.progress = 0.0
+    DispatchQueue.main.async() {
+      [unowned self] in
+      self.progressBar.progress = 0.0
+    }
     let  total = timeline.total
     var  count = 0
     var tweets = [AnyObject]()
@@ -122,6 +125,7 @@ extension SearchViewController
       tweets.append(tweet)
       count += 1
       DispatchQueue.main.async() {
+        [unowned self] in
         let progress: Float = Float(count) / Float(total)
         self.progressBar.setProgress(progress, animated: true)
         if progress >= 1.0 {
@@ -132,7 +136,7 @@ extension SearchViewController
       }
     }
     timelineView.setTimelineData(tweets)
-    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+    self.isNetworkActivityIndicatorVisible = false
   }
 
   func searchTweet(with query: String, sinceId: Int64 = 0) {
@@ -143,14 +147,14 @@ extension SearchViewController
       if sinceId > 0 {
         parameters.sinceId = sinceId
       }
-      UIApplication.shared.isNetworkActivityIndicatorVisible = true
+      self.isNetworkActivityIndicatorVisible = true
       twitter.searchTweet(with: parameters, completion: {
         (timeline: TDKTimeline?, metadata: JSON?, error: Error?) in
         if error == nil, let timeline = timeline {
           self.handleTimeline(timeline)
         }
         else {
-          UIApplication.shared.isNetworkActivityIndicatorVisible = false
+          self.isNetworkActivityIndicatorVisible = false
           dump(error)
         }
       })

@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Sat, Sep 16 2017
+ * UPDATED:	Wed, Oct 18 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -68,6 +68,7 @@ open class TDKTweetTableCell: UITableViewCell
   let playbackButton: UIButton = UIButton()
   let playbackLabel: UILabel = UILabel()
 
+  var dataTask: URLSessionTask? = nil
   var mediaArray: [TDKMedia] = [] // 添付画像管理用
 
   open var tweet: TDKTweet? = nil {
@@ -183,6 +184,12 @@ open class TDKTweetTableCell: UITableViewCell
     mediaView.addSubview(playbackLabel)
 
     prepareTapHandlers()
+  }
+
+  deinit {
+    if let dataTask = self.dataTask, dataTask.state != .completed {
+      dataTask.cancel()
+    }
   }
 
   open override func draw(_ rect: CGRect) {
@@ -603,11 +610,11 @@ extension TDKTweetTableCell
                            timeoutInterval: kCacheTime)
       let config = URLSessionConfiguration.default
       let session = URLSession(configuration: config)
-      session.dataTask(with: req, completionHandler: {
+      let task = session.dataTask(with: req, completionHandler: {
         [weak self] (data, response, error) in
         if error == nil {
           if let weakSelf = self, let imageData = data, let image = UIImage(data: imageData) {
-            DispatchQueue.global(qos: .default).async {
+            DispatchQueue.main.async {
               let w = image.size.width
               let h = image.size.height
               if quoted {
@@ -629,7 +636,9 @@ extension TDKTweetTableCell
           dump(error)
         }
         session.finishTasksAndInvalidate()
-      }).resume()
+      })
+      self.dataTask = task
+      task.resume()
     }
   }
 }

@@ -3,7 +3,7 @@
  * FILE:	HomeViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show Home Timeline
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Wed, Oct 18 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -58,10 +58,10 @@ class HomeViewController: BaseViewController
   let progressBar: UIProgressView = UIProgressView()
   let timelineView: TimelineView = TimelineView()
 
-  var account: ACAccount? = nil
+  var account: TDKAccount? = nil
   var twitter: TDKTwitter? = nil
 
-  public convenience init(with twitter: TDKTwitter, account: ACAccount) {
+  public convenience init(with twitter: TDKTwitter, account: TDKAccount) {
     self.init()
 
     self.twitter = twitter
@@ -131,7 +131,10 @@ extension HomeViewController
 extension HomeViewController
 {
   func handleTimeline(_ timeline: TDKTimeline) {
-    progressBar.progress = 0.0
+    DispatchQueue.main.async() {
+      [unowned self] in
+      self.progressBar.progress = 0.0
+    }
     let  total = timeline.total
     var  count = 0
     var tweets = [AnyObject]()
@@ -139,6 +142,7 @@ extension HomeViewController
       tweets.append(tweet)
       count += 1
       DispatchQueue.main.async() {
+        [unowned self] in
         let progress: Float = Float(count) / Float(total)
         self.progressBar.setProgress(progress, animated: true)
         if progress >= 1.0 {
@@ -149,7 +153,7 @@ extension HomeViewController
       }
     }
     timelineView.setTimelineData(tweets)
-    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+    self.isNetworkActivityIndicatorVisible = false
   }
 
   func getHomeTimeline(with sinceId: Int64 = 0) {
@@ -159,14 +163,14 @@ extension HomeViewController
       if sinceId > 0 {
         parameters.sinceId = sinceId
       }
-      UIApplication.shared.isNetworkActivityIndicatorVisible = true
+      self.isNetworkActivityIndicatorVisible = true
       twitter.getHomeTimeline(with: parameters, completion: {
         (timeline: TDKTimeline?, error: Error?) in
         if error == nil, let timeline = timeline {
           self.handleTimeline(timeline)
         }
         else {
-          UIApplication.shared.isNetworkActivityIndicatorVisible = false
+          self.isNetworkActivityIndicatorVisible = false
           dump(error)
         }
       })

@@ -3,7 +3,7 @@
  * FILE:	TDKTwitter.swift
  * DESCRIPTION:	TwitterDevKit: REST API Wrapper for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Sat, Aug 26 2017
+ * UPDATED:	Wed, Oct 18 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -44,19 +44,54 @@ import Foundation
 import UIKit
 import Accounts
 import Social
+#if !DISABLE_SOCIAL_ACCOUNT_KIT
+import SocialAccountKit
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 public typealias TDKTimelineCompletionHandler = (TDKTimeline?, Error?) -> Void
 public typealias TDKSearchCompletionHandler = (TDKTimeline?, JSON?, Error?) -> Void
 public typealias TDKLookupUserCompletionHandler = ([TDKUser], Error?) -> Void
 
+#if DISABLE_SOCIAL_ACCOUNT_KIT
+public typealias TDKAccount = ACAccount
+#else
+public typealias TDKAccount = SAKAccount
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
+
+#if DISABLE_SOCIAL_ACCOUNT_KIT
+fileprivate typealias RequestMethod = SLRequestMethod
+#else
+fileprivate typealias RequestMethod = SAKRequestMethod
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
+
+fileprivate typealias RequestHandler = (Data?, URLResponse?, Error?) -> Void
+
 public class TDKTwitter: NSObject
 {
-  public internal(set) var account: ACAccount? = nil
+  public internal(set) var account: TDKAccount? = nil
 
-  public required init(with account: ACAccount) {
+  public required init(with account: TDKAccount) {
     super.init()
 
     self.account = account
+  }
+}
+
+extension TDKTwitter
+{
+  fileprivate func connect(to requestURL: URL, method: RequestMethod, parameters: [String:Any], completion: @escaping RequestHandler) -> Void {
+    if let account = self.account {
+#if DISABLE_SOCIAL_ACCOUNT_KIT
+      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: method, url: requestURL, parameters: parameters) {
+        request.account = account
+        request.perform(handler: completion)
+      }
+#else
+      if let request = try? SAKRequest(forAccount: account, requestMethod: method, url: requestURL, parameters: parameters) {
+        request.perform(handler: completion)
+      }
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
+    }
   }
 }
 
@@ -65,28 +100,28 @@ extension TDKTwitter
 {
   public func getHomeTimeline(with parameters: TDKHomeTimelineParameters? = nil, completion: @escaping TDKTimelineCompletionHandler) {
     if let requestURL = URL(string: "https://api.twitter.com/1.1/statuses/home_timeline.json") {
-      self.fetchTimeline(with: requestURL, parameters: parameters?.toJSON(), completion: completion)
+      let params = parameters?.toJSON() ?? [:]
+      self.fetchTimeline(with: requestURL, parameters: params, completion: completion)
     }
   }
 
   public func getUserTimeline(with parameters: TDKUserTimelineParameters? = nil, completion: @escaping TDKTimelineCompletionHandler) {
     if let requestURL = URL(string: "https://api.twitter.com/1.1/statuses/user_timeline.json") {
-      self.fetchTimeline(with: requestURL, parameters: parameters?.toJSON(), completion: completion)
+      let params = parameters?.toJSON() ?? [:]
+      self.fetchTimeline(with: requestURL, parameters: params, completion: completion)
     }
   }
 
-  func fetchTimeline(with requestURL: URL, parameters: [String:Any]? = nil, completion: @escaping TDKTimelineCompletionHandler) {
-    if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .GET, url: requestURL, parameters: parameters) {
-      request.account = self.account
-      request.perform(handler: {(responseData, urlResponse, error) in
+  func fetchTimeline(with requestURL: URL, parameters: [String:Any], completion: @escaping TDKTimelineCompletionHandler) {
+    connect(to: requestURL, method: .GET, parameters: parameters, completion: {
+      (responseData, urlResponse, error) in
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
           timeline = TDKTimeline(with: json)
         }
         completion(timeline, error)
-      })
-    }
+    })
   }
 }
 
@@ -95,19 +130,18 @@ extension TDKTwitter
 {
   public func searchTweet(with parameters: TDKSearchTweetParameters? = nil, completion: @escaping TDKSearchCompletionHandler) {
     if let requestURL = URL(string: "https://api.twitter.com/1.1/search/tweets.json") {
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .GET, url: requestURL, parameters: parameters?.toJSON()) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var timeline: TDKTimeline? = nil
-          var metadata: JSON? = nil
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            timeline = TDKTimeline(with: json["statuses"])
-            metadata = json["search_metadata"]
-          }
-          completion(timeline, metadata, error)
-        })
-      }
+      let params = parameters?.toJSON() ?? [:]
+      connect(to: requestURL, method: .GET, parameters: params, completion: {
+        (responseData, urlResponse, error) in
+        var timeline: TDKTimeline? = nil
+        var metadata: JSON? = nil
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          timeline = TDKTimeline(with: json["statuses"])
+          metadata = json["search_metadata"]
+        }
+        completion(timeline, metadata, error)
+      })
     }
   }
 }
@@ -117,17 +151,16 @@ extension TDKTwitter
 {
   public func getFavoritesList(with parameters: TDKFavoritesParameters? = nil, completion: @escaping TDKTimelineCompletionHandler) {
     if let requestURL = URL(string: "https://api.twitter.com/1.1/favorites/list.json") {
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .GET, url: requestURL, parameters: parameters?.toJSON()) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var timeline: TDKTimeline? = nil
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            timeline = TDKTimeline(with: json)
-          }
-          completion(timeline, error)
-        })
-      }
+      let params = parameters?.toJSON() ?? [:]
+      connect(to: requestURL, method: .GET, parameters: params, completion: {
+        (responseData, urlResponse, error) in
+        var timeline: TDKTimeline? = nil
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          timeline = TDKTimeline(with: json)
+        }
+        completion(timeline, error)
+      })
     }
   }
 
@@ -137,17 +170,15 @@ extension TDKTwitter
         "id" : statusId,
         "include_entities" : String(true)
       ]
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var timeline: TDKTimeline? = nil
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            timeline = TDKTimeline(with: json)
-          }
-          completion(timeline, error)
-        })
-      }
+      connect(to: requestURL, method: .POST, parameters: parameters, completion: {
+        (responseData, urlResponse, error) in
+        var timeline: TDKTimeline? = nil
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          timeline = TDKTimeline(with: json)
+        }
+        completion(timeline, error)
+      })
     }
   }
 
@@ -157,17 +188,15 @@ extension TDKTwitter
         "id" : statusId,
         "include_entities" : String(true)
       ]
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var timeline: TDKTimeline? = nil
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            timeline = TDKTimeline(with: json)
-          }
-          completion(timeline, error)
-        })
-      }
+      connect(to: requestURL, method: .POST, parameters: parameters, completion: {
+        (responseData, urlResponse, error) in
+        var timeline: TDKTimeline? = nil
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          timeline = TDKTimeline(with: json)
+        }
+        completion(timeline, error)
+      })
     }
   }
 }
@@ -182,17 +211,15 @@ extension TDKTwitter
         "id" : statusId,
         "trim_user" : String(false)
       ]
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var timeline: TDKTimeline? = nil
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            timeline = TDKTimeline(with: json)
-          }
-          completion(timeline, error)
-        })
-      }
+      connect(to: requestURL, method: .POST, parameters: parameters, completion: {
+        (responseData, urlResponse, error) in
+        var timeline: TDKTimeline? = nil
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          timeline = TDKTimeline(with: json)
+        }
+        completion(timeline, error)
+      })
     }
   }
 
@@ -204,17 +231,15 @@ extension TDKTwitter
         "count": String(count < 0 || count > 100 ? 100 : count),
         "trim_user" : String(false)
       ]
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .POST, url: requestURL, parameters: parameters) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var timeline: TDKTimeline? = nil
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            timeline = TDKTimeline(with: json)
-          }
-          completion(timeline, error)
-        })
-      }
+      connect(to: requestURL, method: .POST, parameters: parameters, completion: {
+        (responseData, urlResponse, error) in
+        var timeline: TDKTimeline? = nil
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          timeline = TDKTimeline(with: json)
+        }
+        completion(timeline, error)
+      })
     }
   }
 }
@@ -224,35 +249,31 @@ extension TDKTwitter
 {
   public func lookupUser(with parameters: TDKLookupUserParameters, completion: @escaping TDKLookupUserCompletionHandler) {
     if let requestURL = URL(string: "https://api.twitter.com/1.1/users/lookup.json") {
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .GET, url: requestURL, parameters: parameters.toJSON()) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var users = [TDKUser]()
-          if let jsonData = responseData {
-            let json = JSON(jsonData)
-            for user in json {
-              users.append(TDKUser(user))
-            }
+      connect(to: requestURL, method: .GET, parameters: parameters.toJSON(), completion: {
+        (responseData, urlResponse, error) in
+        var users = [TDKUser]()
+        if let jsonData = responseData {
+          let json = JSON(jsonData)
+          for user in json {
+            users.append(TDKUser(user))
           }
-          completion(users, error)
-        })
-      }
+        }
+        completion(users, error)
+      })
     }
   }
 
   public func showUser(with parameters: TDKLookupUserParameters, completion: @escaping TDKLookupUserCompletionHandler) {
     if let requestURL = URL(string: "https://api.twitter.com/1.1/users/show.json") {
-      if let request = SLRequest(forServiceType: SLServiceTypeTwitter, requestMethod: .GET, url: requestURL, parameters: parameters.toJSON()) {
-        request.account = self.account
-        request.perform(handler: { (responseData, urlResponse, error) in
-          var users = [TDKUser]()
-          if let jsonData = responseData {
-            let user = JSON(jsonData)
-            users.append(TDKUser(user))
-          }
-          completion(users, error)
-        })
-      }
+      connect(to: requestURL, method: .GET, parameters: parameters.toJSON(), completion: {
+        (responseData, urlResponse, error) in
+        var users = [TDKUser]()
+        if let jsonData = responseData {
+          let user = JSON(jsonData)
+          users.append(TDKUser(user))
+        }
+        completion(users, error)
+      })
     }
   }
 }

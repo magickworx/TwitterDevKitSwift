@@ -3,7 +3,7 @@
  * FILE:	BaseViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Application Base View Controller
  * DATE:	Fri, Jun  2 2017
- * UPDATED:	Sun, Aug 27 2017
+ * UPDATED:	Thu, Oct 19 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -47,10 +47,24 @@ import AVFoundation
 import Social
 import SafariServices
 import TwitterDevKit
+#if !DISABLE_SOCIAL_ACCOUNT_KIT
+import SocialAccountKit
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 class BaseViewController: UIViewController
 {
   public internal(set) var app: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+
+  public var isNetworkActivityIndicatorVisible: Bool {
+    set {
+      DispatchQueue.main.async {
+        UIApplication.shared.isNetworkActivityIndicatorVisible = newValue
+      }
+    }
+    get {
+      return UIApplication.shared.isNetworkActivityIndicatorVisible
+    }
+  }
 
   required init(coder aDecoder: NSCoder) {
     fatalError("NSCoding not supported")
@@ -262,11 +276,12 @@ extension BaseViewController
 extension BaseViewController
 {
   func composeAction(sender: UIBarButtonItem) {
+#if DISABLE_SOCIAL_ACCOUNT_KIT
     if SLComposeViewController.isAvailable(forServiceType: SLServiceTypeTwitter) {
       autoreleasepool {
         if let slc = SLComposeViewController(forServiceType: SLServiceTypeTwitter) {
           slc.completionHandler = {
-            (result: SLComposeViewControllerResult) -> () in
+            [unowned self] (result: SLComposeViewControllerResult) -> () in
             switch (result) {
             case .done:
               print("tweeted")
@@ -281,5 +296,25 @@ extension BaseViewController
         }
       }
     }
+#else
+    let accountType = SAKAccountType(.twitter)
+    if SAKComposeViewController.isAvailable(for: accountType) {
+      autoreleasepool {
+        let slc = SAKComposeViewController(for: accountType)
+        slc.completionHandler = {
+          [unowned self] (result: SAKComposeViewControllerResult) -> () in
+          switch (result) {
+          case .done(_):
+            print("tweeted")
+          case .cancelled:
+            print("tweet cancel")
+          case .error(let error):
+            self.popup(title: "Error", message: error.localizedDescription)
+          }
+        }
+        present(slc, animated: true, completion: nil)
+      }
+    }
+#endif // DISABLE_SOCIAL_ACCOUNT_KIT
   }
 }
