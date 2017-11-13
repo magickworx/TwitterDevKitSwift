@@ -3,7 +3,7 @@
  * FILE:	TDKParameters.swift
  * DESCRIPTION:	TwitterDevKit: REST API Parameters for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Mon, Nov 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,7 +42,7 @@
 
 import Foundation
 
-let kDefaultCount: Int = 20
+public let kDefaultCount: Int = 20
 
 // MARK: - Parameters to fetch timeline
 public class TDKTimelineCommonParameters
@@ -55,7 +55,7 @@ public class TDKTimelineCommonParameters
   public var excludeReplies: Bool = false
   public var tweetMode: String = "extended"
 
-  public init(with count: Int = kDefaultCount) {
+  public init(count: Int = kDefaultCount) {
     self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
   }
 
@@ -96,13 +96,13 @@ public class TDKUserTimelineParameters: TDKTimelineCommonParameters
   public internal(set) var screenName: String? = nil
   public var includeRts: Bool = true
 
-  public init(with userId: Int64, count: Int = kDefaultCount) {
-    super.init(with: count)
+  public init(userId: Int64, count: Int = kDefaultCount) {
+    super.init(count: count)
     self.userId = userId
   }
 
-  public init(with screenName: String, count: Int = kDefaultCount) {
-    super.init(with: count)
+  public init(screenName: String, count: Int = kDefaultCount) {
+    super.init(count: count)
     self.screenName = screenName
   }
 
@@ -142,7 +142,7 @@ public struct TDKSearchTweetParameters
 
   public internal(set) var query: String
 
-  public init(with q: String, count: Int = kDefaultCount) {
+  public init(q: String, count: Int = kDefaultCount) {
     self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
 #if DISABLE_SOCIAL_ACCOUNT_KIT
     let filteredQuery = q + " -filter:retweets"
@@ -201,7 +201,7 @@ public struct TDKFavoritesParameters
   public var maxId: Int64 = 0
   public var includeEntities: Bool = true
 
-  public init(with count: Int = kDefaultCount) {
+  public init(count: Int = kDefaultCount) {
     self.count = (count < 0 ? kDefaultCount : (count > 200 ? 200 : count))
   }
 
@@ -241,11 +241,15 @@ public struct TDKLookupUserParameters
   public internal(set) var screenName: String? = nil
   public var includeEntities: Bool = true
 
-  public init(with screenName: String) {
+  public init(screenName: String) {
     self.screenName = screenName
   }
 
-  public init(with userId: Int64) {
+  public init(screenNames: [String]) {
+    self.screenName = screenNames.joined(separator: ",")
+  }
+
+  public init(userId: Int64) {
     self.userId = userId
   }
 

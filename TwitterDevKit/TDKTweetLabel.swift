@@ -3,7 +3,7 @@
  * FILE:	TDKTweetLabel.swift
  * DESCRIPTION:	TwitterDevKit: Tweet Label with Clickable Action
  * DATE:	Wed, Aug 23 2017
- * UPDATED:	Thu, Sep 14 2017
+ * UPDATED:	Mon, Nov 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -119,7 +119,7 @@ public enum TDKActiveElement {
 }
 
 
-public typealias TDKTweetLabelActiveAttribute = ([String:Any], TDKActiveType, Bool) -> [String:Any]
+public typealias TDKTweetLabelActiveAttribute = ([NSAttributedStringKey:Any], TDKActiveType, Bool) -> [NSAttributedStringKey:Any]
 
 public protocol TDKTweetLabelDelegate: class {
   func tweetLabel(_ label: TDKTweetLabel, didSelect element: TDKActiveElement)
@@ -263,12 +263,12 @@ extension TDKTweetLabel
     var range = NSRange(location: 0, length: 0)
     var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
 
-    let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
+    let paragraphStyle = attributes[.paragraphStyle] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
     paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
     paragraphStyle.alignment = textAlignment
     paragraphStyle.lineSpacing = lineSpacing
     paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight : self.font.pointSize * 1.14
-    attributes[NSParagraphStyleAttributeName] = paragraphStyle
+    attributes[.paragraphStyle] = paragraphStyle
     mutAttrString.setAttributes(attributes, range: range)
 
     return mutAttrString
@@ -278,8 +278,8 @@ extension TDKTweetLabel
     var range = NSRange(location: 0, length: 0)
     var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
 
-    attributes[NSFontAttributeName] = font!
-    attributes[NSForegroundColorAttributeName] = textColor
+    attributes[.font] = font!
+    attributes[.foregroundColor] = textColor
     mutAttrString.addAttributes(attributes, range: range)
 
     for (type, elements) in activeElements {
@@ -293,17 +293,12 @@ extension TDKTweetLabel
     }
   }
 
-  fileprivate func linkAttributes(_ attributes: [String:Any], activeType: TDKActiveType, isSelected: Bool) -> [String:Any] {
+  fileprivate func linkAttributes(_ attributes: [NSAttributedStringKey:Any], activeType: TDKActiveType, isSelected: Bool) -> [NSAttributedStringKey:Any] {
     let prettyColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
 
     var attrs = attributes
 
-    if isSelected {
-      attrs[NSForegroundColorAttributeName] = UIColor.lightGray
-    }
-    else {
-      attrs[NSForegroundColorAttributeName] = prettyColor
-    }
+    attrs[.foregroundColor] = isSelected ? UIColor.lightGray : prettyColor
     switch activeType {
       case .hashtag:
         break
@@ -311,7 +306,7 @@ extension TDKTweetLabel
         break
       case .url, .media:
         if !isSelected {
-          attrs[NSUnderlineStyleAttributeName] = NSUnderlineStyle.styleSingle.rawValue
+          attrs[.underlineStyle] = NSUnderlineStyle.styleSingle.rawValue
         }
     }
     return attrs
@@ -332,8 +327,10 @@ extension TDKTweetLabel
     var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
 
     var lang: String = Locale.preferredLanguages[0]
-    lang = lang.substring(to: lang.index(lang.startIndex, offsetBy: 2))
-    attributes[kCTLanguageAttributeName as String] = lang // 禁則処理を言語に合わせる
+    let st = lang.startIndex
+    let ed = lang.index(lang.startIndex, offsetBy: 2)
+    lang = String(lang[st..<ed])
+    attributes[kCTLanguageAttributeName as NSAttributedStringKey] = lang // 禁則処理を言語に合わせる
     mutAttrString.setAttributes(attributes, range: range)
   }
 
@@ -350,7 +347,7 @@ extension TDKTweetLabel
     guard let tweet = self.tweet, let text = tweet.displayedText else { return "" }
 
     let tweetText = prettyReplaced(text)
-    let tweetLength = tweetText.characters.count
+    let tweetLength = tweetText.count
 
     let substring = { (_ indices: [Int]) -> (String, Range<String.Index>)? in
       if let st = indices.first, let ed = indices.last {
@@ -365,7 +362,7 @@ extension TDKTweetLabel
                ? tweetText.endIndex
                : tweetText.index(tweetText.startIndex, offsetBy: ed)
         let rn = lo ..< hi
-        let sb = tweetText.substring(with: rn)
+        let sb = String(tweetText[rn])
         return (sb, rn)
       }
       return nil
@@ -381,13 +378,14 @@ extension TDKTweetLabel
       var elements = [ElementTuple]()
       let addHashtag = {
         (_ hashtag: TDKHashtag, _ range: Range<String.Index>) -> Void in
-        let nsRange = tweetText.nsRange(from: range)
-        do {
-          let element = try TDKActiveElement(type: .hashtag, entity: hashtag)
-          elements.append((range: nsRange, element: element, type: .hashtag))
-        }
-        catch let error {
-          dump(error)
+        if let nsRange = tweetText.nsRange(from: range) {
+          do {
+            let element = try TDKActiveElement(type: .hashtag, entity: hashtag)
+            elements.append((range: nsRange, element: element, type: .hashtag))
+          }
+          catch let error {
+            dump(error)
+          }
         }
       }
       for hashtag in hashtags {
@@ -412,13 +410,14 @@ extension TDKTweetLabel
       var elements = [ElementTuple]()
       let addMention = {
         (_ mention: TDKUserMention, _ range: Range<String.Index>) -> Void in
-        let nsRange = tweetText.nsRange(from: range)
-        do {
-          let element = try TDKActiveElement(type: .mention, entity: mention)
-          elements.append((range: nsRange, element: element, type: .mention))
-        }
-        catch let error {
-          dump(error)
+        if let nsRange = tweetText.nsRange(from: range) {
+          do {
+            let element = try TDKActiveElement(type: .mention, entity: mention)
+            elements.append((range: nsRange, element: element, type: .mention))
+          }
+          catch let error {
+            dump(error)
+          }
         }
       }
       for mention in mentions {
@@ -439,8 +438,8 @@ extension TDKTweetLabel
       var elements = [ElementTuple]()
       for url in urls {
         if let urlStr = url.url {
-          if let range = tweetText.range(of: urlStr) {
-            let nsRange = tweetText.nsRange(from: range)
+          if let   range = tweetText.range(of: urlStr),
+             let nsRange = tweetText.nsRange(from: range) {
             do {
               let element = try TDKActiveElement(type: .url, entity: url)
               elements.append((range: nsRange, element: element, type: .url))
@@ -458,8 +457,8 @@ extension TDKTweetLabel
       var elements = [ElementTuple]()
       for medium in media {
         if let urlStr = medium.url {
-          if let range = tweetText.range(of: urlStr) {
-            let nsRange = tweetText.nsRange(from: range)
+          if let   range = tweetText.range(of: urlStr),
+             let nsRange = tweetText.nsRange(from: range) {
             do {
               let element = try TDKActiveElement(type: .media, entity: medium)
               elements.append((range: nsRange, element: element, type: .media))
@@ -609,7 +608,7 @@ extension TDKTweetLabel
     addGestureRecognizer(holdGesture)
   }
 
-  func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+  @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
     if gesture.state == .began {
       becomeFirstResponder()
       let menu = UIMenuController.shared
@@ -688,7 +687,7 @@ extension TDKTweet
   }
 }
 
-
+#if false
 /*
  * nsstring - NSRange to Range<String.Index> - Stack Overflow
  * https://stackoverflow.com/questions/25138339/nsrange-to-rangestring-index
@@ -702,6 +701,25 @@ fileprivate extension String
                    length: utf16.distance(from: from, to: to))
   }
 }
+#else
+/*
+ * swift4 - distance(from:to:)' is unavailable: Any String view index
+ *          conversion can fail in Swift 4; please unwrap the optional indices
+ *        - Stack Overflow
+ * https://stackoverflow.com/questions/46333191/distancefromto-is-unavailable-any-string-view-index-conversion-can-fail-in
+ */
+fileprivate extension String
+{
+  func nsRange(from range: Range<String.Index>) -> NSRange? {
+    if let from = range.lowerBound.samePosition(in: utf16),
+       let   to = range.upperBound.samePosition(in: utf16) {
+      return NSRange(location: utf16.distance(from: utf16.startIndex, to: from),
+                       length: utf16.distance(from: from, to: to))
+    }
+    return nil
+  }
+}
+#endif
 
 fileprivate extension String
 {

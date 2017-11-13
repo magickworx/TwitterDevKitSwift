@@ -23,9 +23,6 @@
 
 /* Begin PBXBuildFile section */
 		B306FFE61F9751D60018116C /* Twitter.plist in Resources */ = {isa = PBXBuildFile; fileRef = B306FFE51F9751D50018116C /* Twitter.plist */; };
-		B306FFE81F9794190018116C /* SocialAccountKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B306FFE71F9794190018116C /* SocialAccountKit.framework */; };
-		B306FFE91F9794290018116C /* SocialAccountKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B306FFE71F9794190018116C /* SocialAccountKit.framework */; };
-		B306FFEA1F9794290018116C /* SocialAccountKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B306FFE71F9794190018116C /* SocialAccountKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B30C463D1EFB947B00F61030 /* TDKParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30C463B1EFB947B00F61030 /* TDKParameters.swift */; };
 		B30C463E1EFB947B00F61030 /* TDKTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30C463C1EFB947B00F61030 /* TDKTimeline.swift */; };
 		B30C46401EFBBD0400F61030 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30C463F1EFBBD0400F61030 /* TimelineView.swift */; };
@@ -48,8 +45,6 @@
 		B383E6311EF844E1004E71A6 /* TDKTwitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E62A1EF844E1004E71A6 /* TDKTwitter.swift */; };
 		B383E6341EF844ED004E71A6 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6321EF844ED004E71A6 /* BaseViewController.swift */; };
 		B383E6351EF844ED004E71A6 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383E6331EF844ED004E71A6 /* RootViewController.swift */; };
-		B383E63B1EF8454D004E71A6 /* TwitterDevKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B383E5FB1EF7A832004E71A6 /* TwitterDevKit.framework */; };
-		B383E63C1EF8454D004E71A6 /* TwitterDevKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B383E5FB1EF7A832004E71A6 /* TwitterDevKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B385F9CC1EFCFFD300610001 /* DumpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B385F9CB1EFCFFD300610001 /* DumpViewController.swift */; };
 		B385F9CE1EFD7AC000610001 /* ImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B385F9CD1EFD7AC000610001 /* ImageViewController.swift */; };
 		B399E9BB1F0008A200AA940A /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B399E9BA1F0008A200AA940A /* HomeViewController.swift */; };
@@ -71,34 +66,8 @@
 		B3E2A1471F694B3300CC7833 /* icon_retweet@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = B3E2A1281F69479900CC7833 /* icon_retweet@3x.png */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		B383E63D1EF8454D004E71A6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B383E5D91EF7A7FF004E71A6 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B383E5FA1EF7A832004E71A6;
-			remoteInfo = TwitterDevKit;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		B383E63F1EF8454D004E71A6 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				B306FFEA1F9794290018116C /* SocialAccountKit.framework in Embed Frameworks */,
-				B383E63C1EF8454D004E71A6 /* TwitterDevKit.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		B306FFE51F9751D50018116C /* Twitter.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Twitter.plist; sourceTree = "<group>"; };
-		B306FFE71F9794190018116C /* SocialAccountKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SocialAccountKit.framework; path = ../../../Library/Frameworks/SocialAccountKit.framework; sourceTree = "<group>"; };
 		B30C463B1EFB947B00F61030 /* TDKParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKParameters.swift; sourceTree = "<group>"; };
 		B30C463C1EFB947B00F61030 /* TDKTimeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTimeline.swift; sourceTree = "<group>"; };
 		B30C463F1EFBBD0400F61030 /* TimelineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
@@ -111,7 +80,6 @@
 		B347D4BA1F2873E500B14C9E /* TDKTweet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweet.swift; sourceTree = "<group>"; };
 		B347D4BF1F2873EC00B14C9E /* TDKUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKUser.swift; sourceTree = "<group>"; };
 		B37A7A0A1F53C8C800068F43 /* TDKTweetLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKTweetLabel.swift; sourceTree = "<group>"; };
-		B37B112A1F96612900EF6306 /* SocialAccountKitSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SocialAccountKitSwift.framework; path = ../../../Library/Frameworks/SocialAccountKitSwift.framework; sourceTree = "<group>"; };
 		B383E5FB1EF7A832004E71A6 /* TwitterDevKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TwitterDevKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B383E5FD1EF7A832004E71A6 /* TwitterDevKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TwitterDevKit.h; sourceTree = "<group>"; };
 		B383E5FE1EF7A832004E71A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -152,7 +120,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B306FFE81F9794190018116C /* SocialAccountKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,8 +127,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B306FFE91F9794290018116C /* SocialAccountKit.framework in Frameworks */,
-				B383E63B1EF8454D004E71A6 /* TwitterDevKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,8 +136,6 @@
 		B37B11291F96612800EF6306 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B306FFE71F9794190018116C /* SocialAccountKit.framework */,
-				B37B112A1F96612900EF6306 /* SocialAccountKitSwift.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -309,12 +272,10 @@
 				B383E6081EF7A868004E71A6 /* Sources */,
 				B383E6091EF7A868004E71A6 /* Frameworks */,
 				B383E60A1EF7A868004E71A6 /* Resources */,
-				B383E63F1EF8454D004E71A6 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				B383E63E1EF8454D004E71A6 /* PBXTargetDependency */,
 			);
 			name = TwitterDevKitDemo;
 			productName = TwitterDevKitDemo;
@@ -414,7 +375,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\n\n#MY_FRAMEWORK_NAME=${PROJECT_NAME}\nMY_FRAMEWORK_NAME=\"TwitterDevKit\"\n\nUNIVERSAL_OUTPUTFOLDER=${BUILD_DIR}/${CONFIGURATION}-universal\n\n# make sure the output directory exists\nmkdir -p \"${UNIVERSAL_OUTPUTFOLDER}\"\n\n# Step 1. Build Device and Simulator versions\nxcodebuild -target \"${MY_FRAMEWORK_NAME}\" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos  BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\nxcodebuild -target \"${MY_FRAMEWORK_NAME}\" -configuration ${CONFIGURATION} -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\n\n# Step 2. Copy the framework structure (from iphoneos build) to the universal folder\ncp -R \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/${MY_FRAMEWORK_NAME}.framework\" \"${UNIVERSAL_OUTPUTFOLDER}/\"\n\n# Step 3. Copy Swift modules from iphonesimulator build (if it exists) to the copied framework directory\nSIMULATOR_SWIFT_MODULES_DIR=\"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${MY_FRAMEWORK_NAME}.framework/Modules/${MY_FRAMEWORK_NAME}.swiftmodule/.\"\nif [ -d \"${SIMULATOR_SWIFT_MODULES_DIR}\" ]; then\ncp -R \"${SIMULATOR_SWIFT_MODULES_DIR}\" \"${UNIVERSAL_OUTPUTFOLDER}/${MY_FRAMEWORK_NAME}.framework/Modules/${MY_FRAMEWORK_NAME}.swiftmodule\"\nfi\n\n# Step 4. Create universal binary file using lipo and place the combined executable in the copied framework directory\nlipo -create -output \"${UNIVERSAL_OUTPUTFOLDER}/${MY_FRAMEWORK_NAME}.framework/${MY_FRAMEWORK_NAME}\" \"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${MY_FRAMEWORK_NAME}.framework/${MY_FRAMEWORK_NAME}\" \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/${MY_FRAMEWORK_NAME}.framework/${MY_FRAMEWORK_NAME}\"\n\n# Step 5. Convenience step to copy the framework to the project's directory\ncp -R \"${UNIVERSAL_OUTPUTFOLDER}/${MY_FRAMEWORK_NAME}.framework\" \"${PROJECT_DIR}\"\n\n# Step 6. Convenience step to open the project's directory in Finder\nopen \"${PROJECT_DIR}\"\n";
+			shellScript = "#!/bin/sh\n\n#MY_FRAMEWORK_NAME=${PROJECT_NAME}\nMY_TARGET_NAME=\"TwitterDevKit\"\nMY_FRAMEWORK_NAME=\"${MY_TARGET_NAME}\"\n\nUNIVERSAL_OUTPUTFOLDER=\"${BUILD_DIR}/${CONFIGURATION}-universal\"\n\n# make sure the output directory exists\nmkdir -p \"${UNIVERSAL_OUTPUTFOLDER}\"\n\n# Step 1. Build Device and Simulator versions\nxcodebuild -target \"${MY_TARGET_NAME}\" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos  BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\nxcodebuild -target \"${MY_TARGET_NAME}\" -configuration ${CONFIGURATION} -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\n\n# Step 2. Copy the framework structure (from iphoneos build) to the universal folder\ncp -R \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/${MY_FRAMEWORK_NAME}.framework\" \"${UNIVERSAL_OUTPUTFOLDER}/\"\n\n# Step 3. Copy Swift modules from iphonesimulator build (if it exists) to the copied framework directory\nSIMULATOR_SWIFT_MODULES_DIR=\"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${MY_FRAMEWORK_NAME}.framework/Modules/${MY_FRAMEWORK_NAME}.swiftmodule/.\"\nif [ -d \"${SIMULATOR_SWIFT_MODULES_DIR}\" ]; then\ncp -R \"${SIMULATOR_SWIFT_MODULES_DIR}\" \"${UNIVERSAL_OUTPUTFOLDER}/${MY_FRAMEWORK_NAME}.framework/Modules/${MY_FRAMEWORK_NAME}.swiftmodule\"\nfi\n\n# Step 4. Create universal binary file using lipo and place the combined executable in the copied framework directory\nlipo -create -output \"${UNIVERSAL_OUTPUTFOLDER}/${MY_FRAMEWORK_NAME}.framework/${MY_FRAMEWORK_NAME}\" \"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${MY_FRAMEWORK_NAME}.framework/${MY_FRAMEWORK_NAME}\" \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/${MY_FRAMEWORK_NAME}.framework/${MY_FRAMEWORK_NAME}\"\n\n# Step 5. Convenience step to copy the framework to the project's directory\ncp -R \"${UNIVERSAL_OUTPUTFOLDER}/${MY_FRAMEWORK_NAME}.framework\" \"${PROJECT_DIR}\"\n\n# Step 6. Convenience step to open the project's directory in Finder\nopen \"${PROJECT_DIR}\"\n";
 		};
 		B383E6231EF7A938004E71A6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -470,14 +431,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		B383E63E1EF8454D004E71A6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = B383E5FA1EF7A832004E71A6 /* TwitterDevKit */;
-			targetProxy = B383E63D1EF8454D004E71A6 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		B383E6171EF7A868004E71A6 /* LaunchScreen.storyboard */ = {
@@ -610,7 +563,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -640,7 +593,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.magickworx.TwitterDevKit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -650,7 +603,6 @@
 		B383E61C1EF7A868004E71A6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -658,11 +610,12 @@
 					"$(USER_LIBRARY_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = TwitterDevKitDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.magickworx.TwitterDevKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
 			};
 			name = Debug;
@@ -670,7 +623,6 @@
 		B383E61D1EF7A868004E71A6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -678,11 +630,12 @@
 					"$(USER_LIBRARY_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = TwitterDevKitDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.magickworx.TwitterDevKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
 			};
 			name = Release;

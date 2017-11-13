@@ -3,7 +3,7 @@
  * FILE:	TDKImageCacheLoader.swift
  * DESCRIPTION:	TwitterDevKit: Asynchoronous Image Downloader with Cache
  * DATE:	Sun, Jun 18 2017
- * UPDATED:	Fri, Sep  1 2017
+ * UPDATED:	Tue, Nov  7 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -49,10 +49,20 @@ public final class TDKImageCacheLoader
 {
   public static let shared: TDKImageCacheLoader = TDKImageCacheLoader()
 
+  let fileManager = FileManager.default
+  var cacheURL: URL
+
   let cache = NSCache<NSString, UIImage>()
   let session = URLSession.shared
 
-  public func fetchImage(with urlString: String, resized size: CGSize = .zero, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
+  init() {
+    cacheURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
+  }
+}
+
+extension TDKImageCacheLoader
+{
+  public func fetchImage(with urlString: String, usingDisk: Bool = false, resized size: CGSize = .zero, cachedTime: TimeInterval = 300, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
     let finished = { [unowned self] (_ image: UIImage, _ key: String) in
       self.cache.setObject(image, forKey: key as NSString)
       DispatchQueue.main.async {
@@ -60,7 +70,17 @@ public final class TDKImageCacheLoader
       }
     }
 
-    if let image = cache.object(forKey: urlString as NSString) {
+    let cacheKey = URL(string: urlString)!.lastPathComponent.replacingOccurrences(of: ":", with: "__")
+    let fileURL = cacheFileURL(forKey: cacheKey)
+
+    if let image = cache.object(forKey: cacheKey as NSString) {
+      DispatchQueue.main.async {
+        completion(image, nil)
+      }
+    }
+    else if fileManager.fileExists(atPath: fileURL.path),
+            let data = try? Data(contentsOf: fileURL) {
+      let image = UIImage(data: data)
       DispatchQueue.main.async {
         completion(image, nil)
       }
@@ -79,25 +99,39 @@ public final class TDKImageCacheLoader
           }
           return
         }
+        if usingDisk, let data = data {
+          let fileURL = self.cacheFileURL(forKey: cacheKey)
+          try? data.write(to: fileURL, options: .atomic)
+        }
         if size.width > 0 && size.height > 0 {
           if let resizedImage = image.resize(to: size) {
-            let key = String(format: "%@+%.0fx%.0f", urlString, size.width, size.height)
+            let key = String(format: "%@+%.0fx%.0f", cacheKey, size.width, size.height)
             finished(resizedImage, key)
           }
           else {
-            finished(image, urlString)
+            finished(image, cacheKey)
           }
         }
         else {
-          finished(image, urlString)
-          /*
-          self.cache.setObject(image, forKey: urlString as NSString)
-          DispatchQueue.main.async {
-            completion(image, nil)
-          }
-          */
+          finished(image, cacheKey)
         }
       }).resume()
+    }
+  }
+
+  fileprivate func cacheFileURL(forKey key: String) -> URL {
+    let filename = "cache+" + key + ".tdk"
+    return cacheURL.appendingPathComponent(filename)
+  }
+
+  public func clearDiskCache() {
+    if let enumerator = fileManager.enumerator(at: cacheURL, includingPropertiesForKeys: [], options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles], errorHandler: nil) {
+      if let fileURLs = enumerator.allObjects as? [URL] {
+        fileURLs.filter({ $0.path.contains(".tdk") }).forEach {
+          [unowned self] (url: URL) in
+          try? self.fileManager.removeItem(at: url)
+        }
+      }
     }
   }
 }

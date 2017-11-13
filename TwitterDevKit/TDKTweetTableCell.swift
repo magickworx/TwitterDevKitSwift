@@ -3,7 +3,7 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Mon, Nov 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -127,21 +127,21 @@ open class TDKTweetTableCell: UITableViewCell
       switch activeType {
         case .hashtag:
           if !isSelected {
-            attrs[NSForegroundColorAttributeName] = hexColor(0x7f7fff)
+            attrs[.foregroundColor] = hexColor(0x7f7fff)
           }
           break
         case .mention:
           if !isSelected {
-            attrs[NSForegroundColorAttributeName] = hexColor(0xff7f7f)
+            attrs[.foregroundColor] = hexColor(0xff7f7f)
           }
           break
         case .url:
           if !isSelected {
-            attrs[NSForegroundColorAttributeName] = hexColor(0x7fbfff)
+            attrs[.foregroundColor] = hexColor(0x7fbfff)
           }
         case .media:
           if !isSelected {
-            attrs[NSForegroundColorAttributeName] = hexColor(0xffbf7f)
+            attrs[.foregroundColor] = hexColor(0xffbf7f)
           }
           break
       }
@@ -238,7 +238,7 @@ open class TDKTweetTableCell: UITableViewCell
     y += h
 
     if let text = quotedTweet.text {
-      if text.characters.count > 0 {
+      if text.count > 0 {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = quotedTweet.lineBreakMode
         let qw: CGFloat = w - m * 2.0
@@ -279,7 +279,7 @@ open class TDKTweetTableCell: UITableViewCell
       quotedMedia.frame = CGRect.zero
     }
 
-    if let text = retweetLabel.text, text.characters.count > 0 {
+    if let text = retweetLabel.text, text.count > 0 {
       h = lineHeight - 4.0
       retweetLabel.frame = CGRect(x: x, y: y, width: w, height: h)
       y += h
@@ -288,7 +288,7 @@ open class TDKTweetTableCell: UITableViewCell
       retweetLabel.frame = CGRect.zero
     }
 
-    if let text = retweetDate.text, text.characters.count > 0 {
+    if let text = retweetDate.text, text.count > 0 {
       h = lineHeight - 4.0
       retweetDate.frame = CGRect(x: x, y: y, width: w, height: h)
       y += h
@@ -410,9 +410,9 @@ extension TDKTweetTableCell
       if user.verified {
         let text = NSMutableAttributedString(string: "@" + screen)
         let prettyColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
-        let attrs: [String:Any] = [
-          NSForegroundColorAttributeName: prettyColor,
-          NSFontAttributeName: screenLabel.font
+        let attrs: [NSAttributedStringKey:Any] = [
+          .foregroundColor: prettyColor,
+          .font: screenLabel.font
         ]
         let checkmark: String = "\u{2714}\u{fe0e}"
         let verified = NSAttributedString(string: checkmark, attributes: attrs)
@@ -439,10 +439,10 @@ extension TDKTweetTableCell
     if let place = status.place {
       dump(place)
     }
-#endif
     if status.possiblySensitive {
       print("sensitive")
     }
+#endif
   }
 
   func getMedia(of status: TDKTweet) -> [TDKMedia]? {
@@ -478,7 +478,7 @@ extension TDKTweetTableCell
     mediaView.addGestureRecognizer(tapGesture)
   }
 
-  func tapIconHandler(sender: UIButton) {
+  @objc func tapIconHandler(sender: UIButton) {
     if var status = self.tweet {
       if let retweetedStatus = status.retweetedStatus {
         status = retweetedStatus
@@ -493,7 +493,7 @@ extension TDKTweetTableCell
     }
   }
 
-  func tapMediaHandler(gesture: UITapGestureRecognizer) {
+  @objc func tapMediaHandler(gesture: UITapGestureRecognizer) {
     if var status = self.tweet {
       if let retweetedStatus = status.retweetedStatus {
         status = retweetedStatus
@@ -561,7 +561,7 @@ extension TDKTweetTableCell
       if let type = media.type?.lowercased(),
          let mediaUrlHttps = media.mediaUrlHttps {
         if type == "photo" || type == "video" || type == "animated_gif"{
-          var   url: String = mediaUrlHttps
+          let   url: String = mediaUrlHttps
           var  size: String = "medium" // tiwtter default
           var ratio:  Float = Float(Float.greatestFiniteMagnitude)
           // 画面の横幅の比率に応じてサイズを自動決定するよ
@@ -591,8 +591,15 @@ extension TDKTweetTableCell
               }
             }
           }
-          url = url + ":" + size
-          self.fetchImage(with: url, quoted: quoted)
+          if size != "large" { // XXX: ダウンロードしてキャッシュで保存
+            DispatchQueue.global(qos: .utility).async {
+              TDKImageCacheLoader.shared.fetchImage(with: url + ":large", usingDisk: true, completion: {
+                (image, error) in
+              })
+            }
+          }
+          let urlString = url + ":" + size
+          self.fetchImage(with: urlString, quoted: quoted)
           self.mediaArray.append(media)
           self.playbackButton.isHidden = type == "photo"
           break
@@ -602,6 +609,31 @@ extension TDKTweetTableCell
   }
 
   func fetchImage(with urlString: String, quoted: Bool = false) {
+#if true
+    TDKImageCacheLoader.shared.fetchImage(with: urlString, usingDisk: true, completion: {
+      [weak self] (image: UIImage?, error: Error?) in
+      if let weakSelf = self {
+        if error == nil, let image = image {
+          DispatchQueue.main.async {
+            let w = image.size.width
+            let h = image.size.height
+            if quoted {
+              weakSelf.quotedMedia.contentMode = w < h ? .center : .scaleAspectFit
+              weakSelf.quotedMedia.setImage(image, withAnimation: .curveLinear)
+            }
+            else {
+              weakSelf.mediaView.contentMode = w < h ? .center : .scaleAspectFit
+              weakSelf.mediaView.setImage(image)
+            }
+            weakSelf.contentView.setNeedsDisplay()
+          }
+        }
+        else {
+          dump(error)
+        }
+      }
+    })
+#else
     let kCacheTime : TimeInterval = 10 * 60 // [seconds]
 
     if let iconUrl = URL(string: urlString) {
@@ -640,6 +672,7 @@ extension TDKTweetTableCell
       self.dataTask = task
       task.resume()
     }
+#endif
   }
 }
 
@@ -716,7 +749,7 @@ extension TDKTweetTableCell
     return image?.withRenderingMode(.alwaysOriginal)
   }
 
-  func playbackHandler(sender: UIButton) {
+  @objc func playbackHandler(sender: UIButton) {
     if var status = self.tweet {
       if let retweetedStatus = status.retweetedStatus {
         status = retweetedStatus

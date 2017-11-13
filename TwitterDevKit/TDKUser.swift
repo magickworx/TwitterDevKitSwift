@@ -3,7 +3,7 @@
  * FILE:	TDKUser.swift
  * DESCRIPTION:	TwitterDevKit: User Structure for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Thu, Sep 14 2017
+ * UPDATED:	Mon, Nov 13 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -98,7 +98,7 @@ public class TDKUser
       self.idStr = idStr
     }
     if let createdAt = json["created_at"].string {
-      self.createdAt = TDKDate(with: createdAt)
+      self.createdAt = TDKDate(string: createdAt)
     }
 
     if let name = json["name"].string {
@@ -220,7 +220,7 @@ public class TDKUser
     }
   }
 
-  static let profileImageSize: CGFloat = 48.0
+  public static let profileImageSize: CGFloat = 48.0
 }
 
 // MARK: - Convenience Methods for Clients

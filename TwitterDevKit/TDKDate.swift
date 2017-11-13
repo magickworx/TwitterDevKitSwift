@@ -3,7 +3,7 @@
  * FILE:	TDKDate.swift
  * DESCRIPTION:	TwitterDevKit: Date Structure for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Jul 26 2017
+ * UPDATED:	Thu, Nov  2 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -47,7 +47,7 @@ public struct TDKDate {
   public internal(set) var date: Date? = nil
 
   // UTC time like "Wed Aug 27 13:08:45 +0000 2008"
-  public init(with dateStr: String) {
+  public init(string dateStr: String) {
     self.dateString = dateStr
 
     let dateFormatter = DateFormatter()

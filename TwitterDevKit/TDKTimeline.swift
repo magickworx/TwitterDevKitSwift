@@ -3,7 +3,7 @@
  * FILE:	TDKTimeline.swift
  * DESCRIPTION:	TwitterDevKit: Timeline for Tweet
  * DATE:	Thu, Jun 22 2017
- * UPDATED:	Sun, Aug 20 2017
+ * UPDATED:	Thu, Nov  2 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -50,7 +50,7 @@ public class TDKTimeline
 
   var statuses: JSON
 
-  public init(with statuses: JSON) {
+  public init(statuses: JSON) {
     self.statuses = statuses
   }
 }

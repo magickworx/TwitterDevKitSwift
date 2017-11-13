@@ -3,7 +3,7 @@
  * FILE:	TweetTableCell.swift
  * DESCRIPTION:	TwitterDevKitDemo: Custom TDKTweetTableCell Class
  * DATE:	Tue, Sep  5 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Tue, Nov  7 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,7 +42,7 @@
 
 import Foundation
 import QuartzCore
-import TwitterDevKit
+import TwitterDevKitSwift
 
 enum TweetAction
 {

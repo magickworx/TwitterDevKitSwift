@@ -3,7 +3,7 @@
  * FILE:	TDKTwitter.swift
  * DESCRIPTION:	TwitterDevKit: REST API Wrapper for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Thu, Nov  2 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -45,7 +45,7 @@ import UIKit
 import Accounts
 import Social
 #if !DISABLE_SOCIAL_ACCOUNT_KIT
-import SocialAccountKit
+import SocialAccountKitSwift
 #endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 public typealias TDKTimelineCompletionHandler = (TDKTimeline?, Error?) -> Void
@@ -70,7 +70,7 @@ public class TDKTwitter: NSObject
 {
   public internal(set) var account: TDKAccount? = nil
 
-  public required init(with account: TDKAccount) {
+  public required init(account: TDKAccount) {
     super.init()
 
     self.account = account
@@ -118,7 +118,7 @@ extension TDKTwitter
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json)
+          timeline = TDKTimeline(statuses: json)
         }
         completion(timeline, error)
     })
@@ -137,7 +137,7 @@ extension TDKTwitter
         var metadata: JSON? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json["statuses"])
+          timeline = TDKTimeline(statuses: json["statuses"])
           metadata = json["search_metadata"]
         }
         completion(timeline, metadata, error)
@@ -157,7 +157,7 @@ extension TDKTwitter
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json)
+          timeline = TDKTimeline(statuses: json)
         }
         completion(timeline, error)
       })
@@ -175,7 +175,7 @@ extension TDKTwitter
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json)
+          timeline = TDKTimeline(statuses: json)
         }
         completion(timeline, error)
       })
@@ -193,7 +193,7 @@ extension TDKTwitter
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json)
+          timeline = TDKTimeline(statuses: json)
         }
         completion(timeline, error)
       })
@@ -216,7 +216,7 @@ extension TDKTwitter
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json)
+          timeline = TDKTimeline(statuses: json)
         }
         completion(timeline, error)
       })
@@ -236,7 +236,7 @@ extension TDKTwitter
         var timeline: TDKTimeline? = nil
         if let jsonData = responseData {
           let json = JSON(jsonData)
-          timeline = TDKTimeline(with: json)
+          timeline = TDKTimeline(statuses: json)
         }
         completion(timeline, error)
       })
