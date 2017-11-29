@@ -3,7 +3,7 @@
  * FILE:	TDKUser.swift
  * DESCRIPTION:	TwitterDevKit: User Structure for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Thu, Nov 16 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -41,6 +41,7 @@
  *****************************************************************************/
 
 import Foundation
+import UIKit
 
 // https://dev.twitter.com/overview/api/users
 public class TDKUser

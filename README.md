@@ -6,6 +6,11 @@
 - TDKTweet class for full parsed API response
 - TDKTweetTableCell as Custom UITableViewCell class for tweet
 
+## Depending
+
+[SocialAccountKitSwift](https://github.com/magickworx/SocialAccountKitSwift)
+
+Add SocialAccountKitSwift.framework to Xcode manually.
 
 ### Supported REST APIs of Twitter
 
@@ -17,12 +22,14 @@
 - 1.1/favorites/destroy
 - 1.1/statuses/destroy
 - 1.1/statuses/retweets
+- 1.1/users/lookup
+- 1.1/users/show
 
 
 ## Usage
 
 ```Swift
-import TwitterDevKit
+import TwitterDevKitSwift
 
 var tableView: UITabelView = UITableView()
 var tableData: [AnyObject] = []
@@ -41,9 +48,9 @@ self.addSubview(tableView)
 ...
 
 let account: ACAccount = "[set twitter account by ACAccountStore]"
-let twitter = TDKTwitter(with: account)
+let twitter = TDKTwitter(account: account)
 let count = 100
-let paramters = TDKHomeTimelineParameters(with: count)
+let paramters = TDKHomeTimelineParameters(count: count)
 twitter.getHomeTimeline(with: parameters, completion: {
   (timeline: TDKTimeline?, error: Error?) in
   if error == nil, let timeline = timeline {
@@ -71,9 +78,9 @@ TwitterDevKitDemo is sample application using TwitterDevKit.framework.
 
 ## Requirements
 
- - Swift 3
- - iOS 10.3 or later
- - Xcode 8.3 or later
+ - Swift 4
+ - iOS 11.0 or later
+ - Xcode 9.0 or later
 
 ## License Agreement
 

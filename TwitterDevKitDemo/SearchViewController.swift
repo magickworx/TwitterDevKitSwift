@@ -3,7 +3,7 @@
  * FILE:	SearchViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Search Tweet
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,7 +42,7 @@
 
 import Foundation
 import UIKit
-import TwitterDevKit
+import TwitterDevKitSwift
 
 class SearchViewController: BaseViewController
 {
@@ -143,7 +143,7 @@ extension SearchViewController
     if let twitter = self.twitter {
       self.timelineView.clearTimelineData()
       let count = 20 // 読み込むツィートの数
-      var parameters = TDKSearchTweetParameters(with: query, count: count)
+      var parameters = TDKSearchTweetParameters(q: query, count: count)
       if sinceId > 0 {
         parameters.sinceId = sinceId
       }
@@ -183,11 +183,10 @@ extension SearchViewController: TimelineViewDelegate
         else {
           dump(user)
         }
-      case .hashtag(let hashtag, let text):
+      case .hashtag(_, let text):
         let keyword = "#" + text
         searchBar.text = keyword
         self.searchTweet(with: keyword)
-//        dump(hashtag)
       case .media(let media, let text):
         if let expandedUrl = media.expandedUrl {
           self.openSafari(string: expandedUrl)

@@ -3,7 +3,7 @@
  * FILE:	ImageViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Present UIImage
  * DATE:	Fri, Jun 23 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -69,7 +69,7 @@ class ImageViewController: UIViewController
     super.loadView()
 
     self.extendedLayoutIncludesOpaqueBars = true
-    self.automaticallyAdjustsScrollViewInsets = false
+
     self.view.autoresizesSubviews = true
     self.view.autoresizingMask = [ .flexibleWidth, .flexibleHeight, .flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin ]
 
@@ -81,6 +81,7 @@ class ImageViewController: UIViewController
     scrollView.minimumZoomScale = 0.5
     scrollView.maximumZoomScale = 8.0
     scrollView.autoresizesSubviews = true
+    scrollView.contentInsetAdjustmentBehavior = .never
     scrollView.autoresizingMask = [ .flexibleWidth, .flexibleHeight ]
     scrollView.addSubview(imageView)
     imageView.isUserInteractionEnabled = true
@@ -144,11 +145,11 @@ class ImageViewController: UIViewController
 // MARK: - Handle UIBarButtonItem Action on UINavigationBar
 extension ImageViewController
 {
-  func closeAction(sender: UIBarButtonItem) {
+  @objc func closeAction(sender: UIBarButtonItem) {
     self.dismiss(animated: true, completion: nil)
   }
 
-  func handleAction(_ sender: UIBarButtonItem) {
+  @objc func handleAction(_ sender: UIBarButtonItem) {
     autoreleasepool {
       if let image = self.image {
         let items = [image]
@@ -281,13 +282,13 @@ extension ImageViewController
     imageView.addGestureRecognizer(holdGesture)
   }
 
-  func tapHandler(gesture: UITapGestureRecognizer) {
+  @objc func tapHandler(gesture: UITapGestureRecognizer) {
     if let isHidden = self.navigationController?.navigationBar.isHidden {
       self.navigationController?.setNavigationBarHidden(!isHidden, animated: true)
     }
   }
 
-  func doubleTapHandler(gesture: UITapGestureRecognizer) {
+  @objc func doubleTapHandler(gesture: UITapGestureRecognizer) {
     if let imageSize = image?.size {
       let  imageWidth: CGFloat = imageSize.width
       let imageHeight: CGFloat = imageSize.height
@@ -309,7 +310,7 @@ extension ImageViewController
     }
   }
 
-  func holdHandler(gesture: UILongPressGestureRecognizer) {
+  @objc func holdHandler(gesture: UILongPressGestureRecognizer) {
     guard gesture.state == .began else { return } // 押し始めのみ利用
 
     if let image = self.image {
@@ -317,7 +318,7 @@ extension ImageViewController
     }
   }
 
-  func handleSavedImage(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeMutableRawPointer) {
+  @objc func handleSavedImage(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeMutableRawPointer) {
     let title: String
     let message: String
     if let error = error {

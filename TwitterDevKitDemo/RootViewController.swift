@@ -3,7 +3,7 @@
  * FILE:	RootViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Twitter View Controller
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -43,9 +43,9 @@
 import Foundation
 import UIKit
 import Accounts
-import TwitterDevKit
+import TwitterDevKitSwift
 #if !DISABLE_SOCIAL_ACCOUNT_KIT
-import SocialAccountKit
+import SocialAccountKitSwift
 #endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 class RootViewController: BaseViewController
@@ -175,7 +175,7 @@ extension RootViewController
             }
           }
           weakSelf.twitterAccount = account
-          weakSelf.twitter = TDKTwitter(with: account)
+          weakSelf.twitter = TDKTwitter(account: account)
           weakSelf.homeTimeline()
         }
       }))
@@ -313,11 +313,11 @@ extension RootViewController
     paragraphStyle.alignment = .center
     paragraphStyle.lineBreakMode = .byClipping
 
-    let attributes: [String:Any] = [
-      NSFontAttributeName: font,
-      NSParagraphStyleAttributeName: paragraphStyle,
-      NSShadowAttributeName: shadow,
-      NSForegroundColorAttributeName: UIColor.white
+    let attributes: [NSAttributedStringKey:Any] = [
+      .font: font,
+      .paragraphStyle: paragraphStyle,
+      .shadow: shadow,
+      .foregroundColor: UIColor.white
     ]
 
     let rect = CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height)

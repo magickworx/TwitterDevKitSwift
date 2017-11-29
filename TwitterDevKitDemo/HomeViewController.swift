@@ -3,7 +3,7 @@
  * FILE:	HomeViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show Home Timeline
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -43,7 +43,7 @@
 import Foundation
 import UIKit
 import Accounts
-import TwitterDevKit
+import TwitterDevKitSwift
 
 protocol HomeViewControllerDelegate: class
 {
@@ -121,7 +121,7 @@ class HomeViewController: BaseViewController
 
 extension HomeViewController
 {
-  func tapTitleButton(_ sender: UIButton) {
+  @objc func tapTitleButton(_ sender: UIButton) {
     if let delegate = self.delegate {
       delegate.homeViewControllerWillChangeAccount(self)
     }
@@ -159,7 +159,7 @@ extension HomeViewController
   func getHomeTimeline(with sinceId: Int64 = 0) {
     if let twitter = self.twitter {
       let count = 200 // 読み込むツィートの数
-      let parameters = TDKHomeTimelineParameters(with: count)
+      let parameters = TDKHomeTimelineParameters(count: count)
       if sinceId > 0 {
         parameters.sinceId = sinceId
       }

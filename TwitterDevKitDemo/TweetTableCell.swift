@@ -41,6 +41,7 @@
  *****************************************************************************/
 
 import Foundation
+import UIKit
 import QuartzCore
 import TwitterDevKitSwift
 
@@ -157,7 +158,7 @@ extension TweetTableCell
     }
   }
 
-  func buttonAction(_ button: TweetActionButton) {
+  @objc func buttonAction(_ button: TweetActionButton) {
     if let delegate = self.myDelegate, let tweet = self.tweet {
       delegate.tweetAction(button.action, for: tweet, finished: {
         [unowned self] (_ finished: Bool) in
@@ -185,7 +186,7 @@ extension TweetTableCell
       }
   }
 
-  func buttonAnimation(_ button: TweetActionButton) {
+  @objc func buttonAnimation(_ button: TweetActionButton) {
     guard button.action != .json else { return }
     DispatchQueue.main.async { [unowned self] in
       self.animateButton(button)

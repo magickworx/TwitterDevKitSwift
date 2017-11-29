@@ -3,7 +3,7 @@
  * FILE:	AppDelegate.swift
  * DESCRIPTION:	TwitterDevKitDemo: Application Main Controller
  * DATE:	Fri, Jun  2 2017
- * UPDATED:	Sun, Jun 25 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -135,11 +135,11 @@ extension AppDelegate
     UIStepper.appearance().tintColor = barColor
     UISwitch.appearance().onTintColor = barColor
 
-    UINavigationBar.appearance().titleTextAttributes = [ NSForegroundColorAttributeName : UIColor.white ]
+    UINavigationBar.appearance().titleTextAttributes = [ .foregroundColor : UIColor.white ]
     UINavigationBar.appearance().tintColor = UIColor.white
     self.themeColor = barColor
 
-    UIBarButtonItem.appearance(whenContainedInInstancesOf: [UIToolbar.self]).setTitleTextAttributes([ NSForegroundColorAttributeName : UIColor.white ], for: [])
+    UIBarButtonItem.appearance(whenContainedInInstancesOf: [UIToolbar.self]).setTitleTextAttributes([ .foregroundColor : UIColor.white ], for: [])
 
     UILabel.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).textColor = barColor
   }

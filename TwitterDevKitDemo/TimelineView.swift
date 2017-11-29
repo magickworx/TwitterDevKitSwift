@@ -3,7 +3,7 @@
  * FILE:	TimelineView.swift
  * DESCRIPTION:	TwitterDevKitDemo: Generic Timeline View Class
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 import UIKit
-import TwitterDevKit
+import TwitterDevKitSwift
 
 protocol TimelineViewDelegate: TDKClickableActionDelegate
 {
@@ -74,6 +74,7 @@ class TimelineView: UIView
     tableView.allowsSelection = false
     tableView.separatorInset = UIEdgeInsets.zero
     tableView.layoutMargins = UIEdgeInsets.zero
+    tableView.contentInsetAdjustmentBehavior = .never
     tableView.register(TweetTableCell.self, forCellReuseIdentifier: kTableCellIdentifier)
     self.addSubview(tableView)
 
@@ -95,7 +96,7 @@ class TimelineView: UIView
     tableView.frame = CGRect(x: x, y: y, width: w, height: h)
   }
 
-  func refreshTableView() {
+  @objc func refreshTableView() {
     if let tweet: TDKTweet = tableData.first as? TDKTweet {
       delegate?.timelineView(self, willRefreshSince: tweet)
     }

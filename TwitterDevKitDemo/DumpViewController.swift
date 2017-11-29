@@ -3,7 +3,7 @@
  * FILE:	DumpViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Print String from dump()
  * DATE:	Fri, Jun 23 2017
- * UPDATED:	Wed, Sep 13 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 import UIKit
-import TwitterDevKit
+import TwitterDevKitSwift
 
 class DumpViewController: BaseViewController
 {
@@ -98,7 +98,7 @@ class DumpViewController: BaseViewController
 
 extension DumpViewController
 {
-  func handleAction(_ sender: UIBarButtonItem) {
+  @objc func handleAction(_ sender: UIBarButtonItem) {
     autoreleasepool {
       if let text = self.text {
         let items = [text]

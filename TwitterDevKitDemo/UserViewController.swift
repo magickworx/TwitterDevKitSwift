@@ -3,7 +3,7 @@
  * FILE:	UserViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Show User Timeline
  * DATE:	Wed, Jun 21 2017
- * UPDATED:	Wed, Oct 18 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,7 +42,7 @@
 
 import Foundation
 import UIKit
-import TwitterDevKit
+import TwitterDevKitSwift
 
 class UserViewController: BaseViewController
 {
@@ -132,7 +132,7 @@ extension UserViewController
   func getUserTimeline(with sinceId: Int64 = 0) {
     if let twitter = self.twitter, let name = screenName {
       let count = 200 // 読み込むツィートの数
-      let parameters = TDKUserTimelineParameters(with: name , count: count)
+      let parameters = TDKUserTimelineParameters(screenName: name , count: count)
       if sinceId > 0 {
         parameters.sinceId = sinceId
       }

@@ -3,7 +3,7 @@
  * FILE:	BaseViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: Application Base View Controller
  * DATE:	Fri, Jun  2 2017
- * UPDATED:	Thu, Oct 19 2017
+ * UPDATED:	Wed, Nov 29 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -46,9 +46,9 @@ import AVKit
 import AVFoundation
 import Social
 import SafariServices
-import TwitterDevKit
+import TwitterDevKitSwift
 #if !DISABLE_SOCIAL_ACCOUNT_KIT
-import SocialAccountKit
+import SocialAccountKitSwift
 #endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 class BaseViewController: UIViewController
@@ -80,22 +80,10 @@ class BaseViewController: UIViewController
 
     self.edgesForExtendedLayout = []
     self.extendedLayoutIncludesOpaqueBars = true
-    self.automaticallyAdjustsScrollViewInsets = false
 
     self.view.backgroundColor = .white
     self.view.autoresizesSubviews = true
     self.view.autoresizingMask	= [ .flexibleWidth, .flexibleHeight ]
-
-    var frame: CGRect = self.view.frame
-    let statusBarHeight: CGFloat = UIApplication.shared.statusBarFrame.size.height
-    frame.origin.y    += statusBarHeight
-    frame.size.height -= statusBarHeight
-
-    if let navBarHeight: CGFloat = self.navigationController?.navigationBar.bounds.size.height {
-      frame.origin.y    += navBarHeight
-      frame.size.height -= navBarHeight
-    }
-    self.view.frame = frame
   }
 
   func setup() {
@@ -227,7 +215,7 @@ extension BaseViewController
                           object: nil)
   }
 
-  func playerDidFinishPlaying(_ notification: Notification) {
+  @objc func playerDidFinishPlaying(_ notification: Notification) {
     DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1500), execute: {
       [unowned self] in
       self.dismiss(animated: true, completion: {
@@ -275,7 +263,7 @@ extension BaseViewController
 
 extension BaseViewController
 {
-  func composeAction(sender: UIBarButtonItem) {
+  @objc func composeAction(sender: UIBarButtonItem) {
 #if DISABLE_SOCIAL_ACCOUNT_KIT
     if SLComposeViewController.isAvailable(forServiceType: SLServiceTypeTwitter) {
       autoreleasepool {
