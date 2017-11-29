@@ -3,7 +3,7 @@
  * FILE:	TDKUser.swift
  * DESCRIPTION:	TwitterDevKit: User Structure for Entity of Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Mon, Nov 13 2017
+ * UPDATED:	Thu, Nov 16 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -226,8 +226,7 @@ public class TDKUser
 // MARK: - Convenience Methods for Clients
 extension TDKUser
 {
-  public func fetchProfileImage(with size: CGSize = CGSize(width: TDKUser.profileImageSize, height: TDKUser.profileImageSize), completion: @escaping TDKImageCacheLoaderCompletionHandler) {
-    let imageSize: ProfileImageSize = .custom
+  public func fetchProfileImage(with size: CGSize = CGSize(width: TDKUser.profileImageSize, height: TDKUser.profileImageSize), imageSize: ProfileImageSize = .custom, completion: @escaping TDKImageCacheLoaderCompletionHandler) {
     var urlString: String = ""
     if let url = self.profileImageUrlHttps {
       urlString = imageSize.convert(from: url)
@@ -273,7 +272,7 @@ public enum ProfileImageSize
   case normal // 48x48 [px]
   case bigger // 73x73 [px]
   case mini   // 24x24 [px]
-  case custom // 400x400 [px] (undocumented)
+  case custom // 400x400? [px] (undocumented)
 
   public func convert(from urlString: String) -> String {
     var suffix: String = ""
@@ -285,7 +284,7 @@ public enum ProfileImageSize
       case .mini:
         suffix = "_mini"
       case .original:
-        break
+        suffix = ""
       case .custom:
         suffix = "_400x400"
     }

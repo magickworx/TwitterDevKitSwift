@@ -3,7 +3,7 @@
  * FILE:	TDKTwitter.swift
  * DESCRIPTION:	TwitterDevKit: REST API Wrapper for Twitter
  * DATE:	Sat, Jun 10 2017
- * UPDATED:	Thu, Nov  2 2017
+ * UPDATED:	Tue, Nov 14 2017
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
@@ -42,15 +42,17 @@
 
 import Foundation
 import UIKit
+#if DISABLE_SOCIAL_ACCOUNT_KIT
 import Accounts
 import Social
-#if !DISABLE_SOCIAL_ACCOUNT_KIT
+#else
 import SocialAccountKitSwift
 #endif // DISABLE_SOCIAL_ACCOUNT_KIT
 
 public typealias TDKTimelineCompletionHandler = (TDKTimeline?, Error?) -> Void
 public typealias TDKSearchCompletionHandler = (TDKTimeline?, JSON?, Error?) -> Void
 public typealias TDKLookupUserCompletionHandler = ([TDKUser], Error?) -> Void
+public typealias TDKRateLimitStatusCompletionHandler = (JSON?, Error?) -> Void
 
 #if DISABLE_SOCIAL_ACCOUNT_KIT
 public typealias TDKAccount = ACAccount
@@ -273,6 +275,26 @@ extension TDKTwitter
           users.append(TDKUser(user))
         }
         completion(users, error)
+      })
+    }
+  }
+}
+
+// MARK: - Rate Limit Status
+extension TDKTwitter
+{
+  public func rateLimitStatus(parameters stringArray: [String] = [], completion: @escaping TDKRateLimitStatusCompletionHandler) {
+    if let requestURL = URL(string: "https://api.twitter.com/1.1/application/rate_limit_status.json") {
+      let parameters = stringArray.count > 0
+                     ? [ "resources": stringArray.joined(separator: ",") ]
+                     : Dictionary<String,String>()
+      connect(to: requestURL, method: .GET, parameters: parameters, completion: {
+        (responseData, urlResponse, error) in
+        var json: JSON?
+        if let jsonData = responseData {
+          json = JSON(jsonData)
+        }
+        completion(json, error)
       })
     }
   }
