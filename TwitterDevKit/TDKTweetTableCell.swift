@@ -3,14 +3,14 @@
  * FILE:	TDKTweetTableCell.swift
  * DESCRIPTION:	TwitterDevKit: Custom UITableViewCell with TDKTweet
  * DATE:	Thu, Jun 15 2017
- * UPDATED:	Mon, Nov 13 2017
+ * UPDATED:	Mon, Nov 26 2018
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
- * COPYRIGHT:	(c) 2017 阿部康一／Kouichi ABE (WALL), All rights reserved.
+ * COPYRIGHT:	(c) 2017-2018 阿部康一／Kouichi ABE (WALL), All rights reserved.
  * LICENSE:
  *
- *  Copyright (c) 2017 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
+ *  Copyright (c) 2017-2018 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ open class TDKTweetTableCell: UITableViewCell
     fatalError("init(coder:) has not been implemented")
   }
 
-  public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+  public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
 
     self.selectionStyle = .none
@@ -410,7 +410,7 @@ extension TDKTweetTableCell
       if user.verified {
         let text = NSMutableAttributedString(string: "@" + screen)
         let prettyColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
-        let attrs: [NSAttributedStringKey:Any] = [
+        let attrs: [NSAttributedString.Key:Any] = [
           .foregroundColor: prettyColor,
           .font: screenLabel.font
         ]
@@ -796,7 +796,7 @@ fileprivate extension String {
 
 fileprivate extension UIImageView
 {
-  func setImage(_ image: UIImage, withAnimation options: UIViewAnimationOptions = .curveEaseInOut) {
+  func setImage(_ image: UIImage, withAnimation options: UIView.AnimationOptions = .curveEaseInOut) {
     DispatchQueue.main.async { [weak self] in
       if let weakSelf = self {
         weakSelf.alpha = 0.0

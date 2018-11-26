@@ -66,6 +66,29 @@
 		B3E2A1471F694B3300CC7833 /* icon_retweet@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = B3E2A1281F69479900CC7833 /* icon_retweet@3x.png */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		B370C0EA21ABE4E6007C1FA7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B383E5D91EF7A7FF004E71A6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B383E5FA1EF7A832004E71A6;
+			remoteInfo = TwitterDevKitSwift;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B370C0EF21ABE6FC007C1FA7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		B306FFE51F9751D50018116C /* Twitter.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Twitter.plist; sourceTree = "<group>"; };
 		B30C463B1EFB947B00F61030 /* TDKParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TDKParameters.swift; sourceTree = "<group>"; };
@@ -272,10 +295,12 @@
 				B383E6081EF7A868004E71A6 /* Sources */,
 				B383E6091EF7A868004E71A6 /* Frameworks */,
 				B383E60A1EF7A868004E71A6 /* Resources */,
+				B370C0EF21ABE6FC007C1FA7 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B370C0EB21ABE4E6007C1FA7 /* PBXTargetDependency */,
 			);
 			name = TwitterDevKitDemo;
 			productName = TwitterDevKitDemo;
@@ -432,6 +457,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		B370C0EB21ABE4E6007C1FA7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B383E5FA1EF7A832004E71A6 /* TwitterDevKitSwift */;
+			targetProxy = B370C0EA21ABE4E6007C1FA7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		B383E6171EF7A868004E71A6 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
@@ -485,7 +518,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -530,7 +563,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -563,8 +596,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
-				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				SWIFT_VERSION = 4.2;
+				VALID_ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -593,8 +626,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.magickworx.TwitterDevKit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
-				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				SWIFT_VERSION = 4.2;
+				VALID_ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -605,18 +638,19 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
+				DYLIB_INSTALL_NAME_BASE = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(USER_LIBRARY_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = TwitterDevKitDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.magickworx.TwitterDevKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
-				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				SWIFT_VERSION = 4.2;
+				VALID_ARCHS = "x86_64 $(ARCHS_STANDARD_64_BIT)";
 			};
 			name = Debug;
 		};
@@ -625,18 +659,19 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
+				DYLIB_INSTALL_NAME_BASE = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(USER_LIBRARY_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = TwitterDevKitDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.magickworx.TwitterDevKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
-				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				SWIFT_VERSION = 4.2;
+				VALID_ARCHS = "x86_64 $(ARCHS_STANDARD_64_BIT)";
 			};
 			name = Release;
 		};
@@ -646,7 +681,7 @@
 				DEVELOPMENT_TEAM = "";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				VALID_ARCHS = "arm64 x86_64";
 			};
 			name = Debug;
 		};
@@ -656,7 +691,7 @@
 				DEVELOPMENT_TEAM = "";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				VALID_ARCHS = "arm64 x86_64";
 			};
 			name = Release;
 		};

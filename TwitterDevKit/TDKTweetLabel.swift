@@ -3,15 +3,15 @@
  * FILE:	TDKTweetLabel.swift
  * DESCRIPTION:	TwitterDevKit: Tweet Label with Clickable Action
  * DATE:	Wed, Aug 23 2017
- * UPDATED:	Mon, Nov 13 2017
+ * UPDATED:	Mon, Nov 26 2018
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
  * REFERENCED:  https://github.com/optonaut/ActiveLabel.swift
- * COPYRIGHT:	(c) 2017 阿部康一／Kouichi ABE (WALL), All rights reserved.
+ * COPYRIGHT:	(c) 2017-2018 阿部康一／Kouichi ABE (WALL), All rights reserved.
  * LICENSE:
  *
- *  Copyright (c) 2017 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
+ *  Copyright (c) 2017-2018 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@ public enum TDKActiveElement {
 }
 
 
-public typealias TDKTweetLabelActiveAttribute = ([NSAttributedStringKey:Any], TDKActiveType, Bool) -> [NSAttributedStringKey:Any]
+public typealias TDKTweetLabelActiveAttribute = ([NSAttributedString.Key:Any], TDKActiveType, Bool) -> [NSAttributedString.Key:Any]
 
 public protocol TDKTweetLabelDelegate: class {
   func tweetLabel(_ label: TDKTweetLabel, didSelect element: TDKActiveElement)
@@ -293,7 +293,7 @@ extension TDKTweetLabel
     }
   }
 
-  fileprivate func linkAttributes(_ attributes: [NSAttributedStringKey:Any], activeType: TDKActiveType, isSelected: Bool) -> [NSAttributedStringKey:Any] {
+  fileprivate func linkAttributes(_ attributes: [NSAttributedString.Key:Any], activeType: TDKActiveType, isSelected: Bool) -> [NSAttributedString.Key:Any] {
     let prettyColor = UIColor(red: 29.0/255.0, green: 161.0/255.0, blue: 242.0/255.0, alpha: 1.0)
 
     var attrs = attributes
@@ -306,7 +306,7 @@ extension TDKTweetLabel
         break
       case .url, .media:
         if !isSelected {
-          attrs[.underlineStyle] = NSUnderlineStyle.styleSingle.rawValue
+          attrs[.underlineStyle] = NSUnderlineStyle.single.rawValue
         }
     }
     return attrs
@@ -330,7 +330,7 @@ extension TDKTweetLabel
     let st = lang.startIndex
     let ed = lang.index(lang.startIndex, offsetBy: 2)
     lang = String(lang[st..<ed])
-    attributes[kCTLanguageAttributeName as NSAttributedStringKey] = lang // 禁則処理を言語に合わせる
+    attributes[kCTLanguageAttributeName as NSAttributedString.Key] = lang // 禁則処理を言語に合わせる
     mutAttrString.setAttributes(attributes, range: range)
   }
 

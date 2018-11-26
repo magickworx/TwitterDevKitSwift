@@ -78,13 +78,13 @@ TwitterDevKitDemo is sample application using TwitterDevKit.framework.
 
 ## Requirements
 
- - Swift 4
- - iOS 11.0 or later
- - Xcode 9.0 or later
+ - Swift 4.2
+ - iOS 12.1 or later
+ - Xcode 10.1 or later
 
 ## License Agreement
 
-Copyright (c) 2017, Kouichi ABE (WALL) All rights reserved.
+Copyright (c) 2017-2018, Kouichi ABE (WALL) All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:

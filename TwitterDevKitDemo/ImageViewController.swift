@@ -3,14 +3,14 @@
  * FILE:	ImageViewController.swift
  * DESCRIPTION:	TwitterDevKitDemo: View Controller to Present UIImage
  * DATE:	Fri, Jun 23 2017
- * UPDATED:	Wed, Nov 29 2017
+ * UPDATED:	Mon, Nov 26 2018
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
- * COPYRIGHT:	(c) 2017 阿部康一／Kouichi ABE (WALL), All rights reserved.
+ * COPYRIGHT:	(c) 2017-2018 阿部康一／Kouichi ABE (WALL), All rights reserved.
  * LICENSE:
  *
- *  Copyright (c) 2017 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
+ *  Copyright (c) 2017-2018 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -117,8 +117,6 @@ class ImageViewController: UIViewController
     self.navigationController?.navigationBar.shadowImage = UIImage()
     self.navigationController?.navigationBar.isTranslucent = true
     self.navigationController?.view.backgroundColor = .clear
-
-    UIApplication.shared.isStatusBarHidden = true
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -131,14 +129,16 @@ class ImageViewController: UIViewController
     super.viewWillDisappear(animated)
 
     self.navigationController?.navigationBar.isHidden = false
-
-    UIApplication.shared.isStatusBarHidden = false
   }
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
 
     imageSizeToFit(true, animated: false)
+  }
+
+  override var prefersStatusBarHidden: Bool {
+    return true
   }
 }
 
@@ -207,7 +207,7 @@ extension ImageViewController
         scaleAnimation.duration = 0.8
         scaleAnimation.autoreverses = false
         scaleAnimation.isRemovedOnCompletion = true
-        scaleAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+        scaleAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         imageView.layer.add(scaleAnimation, forKey: "scaleAnimation")
       }
 

@@ -3,14 +3,14 @@
  * FILE:	TweetTableCell.swift
  * DESCRIPTION:	TwitterDevKitDemo: Custom TDKTweetTableCell Class
  * DATE:	Tue, Sep  5 2017
- * UPDATED:	Tue, Nov  7 2017
+ * UPDATED:	Mon, Nov 26 2018
  * AUTHOR:	Kouichi ABE (WALL) / 阿部康一
  * E-MAIL:	kouichi@MagickWorX.COM
  * URL:		http://www.MagickWorX.COM/
- * COPYRIGHT:	(c) 2017 阿部康一／Kouichi ABE (WALL), All rights reserved.
+ * COPYRIGHT:	(c) 2017-2018 阿部康一／Kouichi ABE (WALL), All rights reserved.
  * LICENSE:
  *
- *  Copyright (c) 2017 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
+ *  Copyright (c) 2017-2018 Kouichi ABE (WALL) <kouichi@MagickWorX.COM>,
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ class TweetTableCell: TDKTweetTableCell
     fatalError("init(coder:) has not been implemented")
   }
 
-  override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
 
     toolbox.backgroundColor = .clear
@@ -201,7 +201,7 @@ extension TweetTableCell
     scaleAnimation.duration = 0.5
     scaleAnimation.autoreverses = true
     scaleAnimation.isRemovedOnCompletion = true
-    scaleAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+    scaleAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
     button.layer.add(scaleAnimation, forKey: "scaleAnimation")
   }
 }
